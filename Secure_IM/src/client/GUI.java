@@ -5,29 +5,46 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.BufferedReader;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
+import java.net.URL;
+import java.util.ArrayList;
 
 import javax.swing.*;
 
-public class GUI implements KeyListener, WindowListener, ActionListener{
-	private String message;
+//TODO Make Message History Box Scrollable
+public class GUI implements KeyListener, WindowListener, ActionListener, MouseListener{
 	private JFrame mainFrame;
 	private JTextArea messageInputArea;
 	private JTextArea messageHistoryArea;
-	private JList buddyListArea;
+	private JList<String> buddyListArea;
 	private JButton addBuddyButton, removeBuddyButton;
 	private JPanel leftPanel, topPanel, bottomPanel, middlePanel;
+	private final DefaultListModel<String> model = new DefaultListModel<String>();
 	
 	public GUI(){
 		// If first time running program, prompt for user name
 		if(Client_Driver.getCurrentUser() == null){
 			String userName = JOptionPane.showInputDialog(null, "Username:", null);
-			Client_Driver.createUser(userName, "192.168.1.1");
+			String IPAddress = "";
+			
+			try {
+				URL whatismyip = new URL("http://api.exip.org/?call=ip");
+				BufferedReader in = new BufferedReader(new InputStreamReader(whatismyip.openStream()));
+				IPAddress = in.readLine();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+			Client_Driver.createUser(userName, IPAddress);
 			
 			// Valid user name check
 			if(userName == null || userName.equals("")){
@@ -40,6 +57,7 @@ public class GUI implements KeyListener, WindowListener, ActionListener{
 		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		mainFrame.setSize(700, 700);
 		mainFrame.setLayout(new BorderLayout());
+		mainFrame.setResizable(false);
 		
 		// Set screen location
 		int width = (int) Toolkit.getDefaultToolkit().getScreenSize().getWidth();
@@ -51,6 +69,7 @@ public class GUI implements KeyListener, WindowListener, ActionListener{
 		messageInputArea = new JTextArea(10,61);
 		messageInputArea.setLineWrap(true);
 		messageInputArea.addKeyListener(this);
+		messageInputArea.setBackground(Color.lightGray);
 		bottomPanel.add(messageInputArea, BorderLayout.SOUTH);
 		
 		// Top panel creation
@@ -61,21 +80,35 @@ public class GUI implements KeyListener, WindowListener, ActionListener{
 		addBuddyButton.addActionListener(this);
 		removeBuddyButton.addActionListener(this);
 		
-		topPanel.add(addBuddyButton, BorderLayout.WEST);
-		topPanel.add(removeBuddyButton, BorderLayout.WEST);
+		topPanel.setLayout(new GridLayout());
+		JLabel buddyLabel = new JLabel("Buddy List");
+		topPanel.add(buddyLabel, BorderLayout.WEST);
+		topPanel.add(addBuddyButton);
+		topPanel.add(removeBuddyButton);
 		
 		// Center panel creation
 		middlePanel = new JPanel();
-		messageHistoryArea = new JTextArea(40, 100);
+		messageHistoryArea = new JTextArea(30, 54);
+		messageHistoryArea.setBackground(Color.lightGray);
+		messageHistoryArea.setEditable(false);
+		
+		JScrollPane scroll = new JScrollPane (messageHistoryArea);
+		middlePanel.add(scroll);
 		middlePanel.add(messageHistoryArea);
 		
 		// Left panel creation
-		// ADD MOUSE EVENT FOR WHEN A NEW BUDDY IS CLICKED, WILL UPDATE MESSAGEHISTORY (STORE MESSAGE HISTORY NOT IN THIS CLASS)
 		leftPanel = new JPanel();
 		leftPanel.setSize(50, 600);
 		
-		buddyListArea = new JList(Client_Driver.getCurrentUser().getBuddies().toArray());
+		buddyListArea = new JList<String>(model);
+		ArrayList<String> buddies =  Client_Driver.getCurrentUser().getBuddies();
+		for(String curBuddy : buddies){
+			model.addElement(curBuddy);
+		}
+		
 		buddyListArea.setLayoutOrientation(JList.VERTICAL);
+		buddyListArea.setBackground(Color.white);
+		buddyListArea.addMouseListener(this);
 		leftPanel.add(buddyListArea, BorderLayout.WEST);
 		
 		// Add panels to frame and display frame
@@ -86,42 +119,26 @@ public class GUI implements KeyListener, WindowListener, ActionListener{
 		mainFrame.addWindowListener(this);
 		mainFrame.setVisible(true);
 	}
-
-	public void updateMessageInputArea(String message){
-		messageInputArea.setText(message);
-	}
-	
-	public void updateMessageHistoryArea(String history){
-		messageHistoryArea.setText(history);
-	}
-	
-	public void updateBuddyList(){
-		// NOT WORKING
-		buddyListArea.revalidate();
-		buddyListArea.repaint();
-		
-		leftPanel.revalidate();
-		leftPanel.repaint();
-		
-		mainFrame.validate();
-		mainFrame.repaint();
-	}
 	
 	// KeyListener Methods
 	@Override
 	public void keyTyped(KeyEvent arg0) {
 		if(arg0.getKeyChar() == '\n'){
-			// Get message and clear area
-			message = messageInputArea.getText();
-			messageInputArea.setText("");
+			String receiver = (String) buddyListArea.getSelectedValue();
 			
-			System.out.println(message); // for testing
-			
-			if(message != null || message != ""){
-				// Send Message
+			if(receiver != null){
+				// Get message and clear area
+				String message = messageInputArea.getText();
+				message = message.trim();
+				
+				if(!message.equals("") || message == null){
+					// Send Message
+					Client_Driver.getCurrentUser().addSentMessage(receiver, message);
+					messageHistoryArea.setText(Client_Driver.getCurrentUser().getMessageHistory(receiver));
+				}
 			}
 			
-			message = "";
+			messageInputArea.setText("");
 		}
 	}
 	
@@ -169,11 +186,41 @@ public class GUI implements KeyListener, WindowListener, ActionListener{
 		if(arg0.getActionCommand().equals("Add Buddy")){
 			String buddyName = JOptionPane.showInputDialog(null, "Buddy Name:", null);
 			Client_Driver.getCurrentUser().addBuddy(buddyName);
+			
+			model.addElement(buddyName);
+			mainFrame.validate();
 		}else if(arg0.getActionCommand().equals("Remove Buddy")){
-			String buddyName = JOptionPane.showInputDialog(null, "Buddy Name:", null);
-			Client_Driver.getCurrentUser().removeBuddy(buddyName);
+			String buddyName = (String) buddyListArea.getSelectedValue();
+			
+			if(buddyName != null){
+				Client_Driver.getCurrentUser().removeBuddy(buddyName);
+				Client_Driver.getCurrentUser().deleteMessageHistory(buddyName);
+				
+				model.remove(model.indexOf(buddyName));
+				mainFrame.validate();	
+				messageHistoryArea.setText("");
+			}
 		}
-		
-		updateBuddyList();
 	}
+	
+	@Override
+	public void mouseReleased(MouseEvent arg0) {
+		String selectedBuddy = (String) buddyListArea.getSelectedValue();
+		
+		if(selectedBuddy != null){
+			messageHistoryArea.setText(Client_Driver.getCurrentUser().getMessageHistory(selectedBuddy));
+		}
+	}
+	
+	@Override
+	public void mouseClicked(MouseEvent arg0) { }
+
+	@Override
+	public void mouseEntered(MouseEvent arg0) { }
+
+	@Override
+	public void mouseExited(MouseEvent arg0) { }
+
+	@Override
+	public void mousePressed(MouseEvent arg0) { }
 }

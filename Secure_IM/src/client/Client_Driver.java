@@ -8,6 +8,7 @@ public class Client_Driver {
 	
 	public static void createUser(String userName, String IPAddress){
 		currentUser = new User(userName, IPAddress);
+		// Update Server with user name so there are no duplicates
 	}
 	
 	public static User getCurrentUser(){
