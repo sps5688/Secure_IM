@@ -1,0 +1,15 @@
+package client;
+
+import java.net.*;
+
+public class Comm {
+
+	private Socket s;
+	private ServerSocket ss;
+	private InetAddress SERVER = InetAddress.getByAddress("127.0.0.1");
+	
+	public Comm( String username ){
+		
+	}
+	
+}

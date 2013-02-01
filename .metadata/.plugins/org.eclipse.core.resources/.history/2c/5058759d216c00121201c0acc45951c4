@@ -1,0 +1,20 @@
+package client;
+
+import java.net.*;
+
+public class Comm {
+
+	private Socket s;
+	private ServerSocket ss;
+	private InetAddress SERVER;
+	
+	public Comm( String username ){
+		try {
+			SERVER = InetAddress.getLocalHost();
+		} catch (UnknownHostException e) {
+			throw new NoInternetException("Cannot find server");
+		}
+		
+	}
+	
+}

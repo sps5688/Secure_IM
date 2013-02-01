@@ -1,13 +1,15 @@
 package server;
 
+import common.ServerPacket;
+
 public class ServerPacket_Handler extends Thread {
 	private String username;
 	private ClientInfo information;
 	
-	public ServerPacket_Handler(ServerPacket packet){
+	public ServerPacket_Handler(ServerPacket packet, ClientInfo information){
 		// Extract info
 		username = packet.getUsername();
-		information = packet.getInfo();
+		this.information = information;
 	}
 	
 	@Override

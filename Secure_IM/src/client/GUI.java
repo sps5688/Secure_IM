@@ -25,10 +25,10 @@ public class GUI implements KeyListener, WindowListener, ActionListener, MouseLi
 	private JFrame mainFrame;
 	private JTextArea messageInputArea;
 	private JTextArea messageHistoryArea;
-	private JList<String> buddyListArea;
+	private JList buddyListArea;
 	private JButton addBuddyButton, removeBuddyButton;
 	private JPanel leftPanel, topPanel, bottomPanel, middlePanel;
-	private final DefaultListModel<String> model = new DefaultListModel<String>();
+	private final DefaultListModel model = new DefaultListModel();
 	
 	public GUI(){
 		// If first time running program, prompt for user name
@@ -100,7 +100,7 @@ public class GUI implements KeyListener, WindowListener, ActionListener, MouseLi
 		leftPanel = new JPanel();
 		leftPanel.setSize(50, 600);
 		
-		buddyListArea = new JList<String>(model);
+		buddyListArea = new JList(model);
 		ArrayList<String> buddies =  Client_Driver.getCurrentUser().getBuddies();
 		for(String curBuddy : buddies){
 			model.addElement(curBuddy);

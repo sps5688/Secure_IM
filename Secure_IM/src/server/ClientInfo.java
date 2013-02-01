@@ -2,19 +2,19 @@ package server;
 
 import java.util.HashSet;
 
+import common.Status;
+
 public class ClientInfo {
 	private HashSet<String> toBeNotified;
 	private Status status;
-	private enum Status{ online, offline, away; }
 	
-	public void changeStatus(String userStatus){
-		if(userStatus.equals("online")){
-			status = Status.online;
-		}else if(userStatus.equals("away")){
-			status = Status.away;
-		}else{
-			status = Status.offline;
-		}
+	public ClientInfo(){
+		toBeNotified = new HashSet<String>();
+		status = Status.online;
+	}
+	
+	public void changeStatus(Status userStatus){
+		status = userStatus;
 	}
 	
 	public String getStatus(){

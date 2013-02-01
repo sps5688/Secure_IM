@@ -5,6 +5,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
 
+import common.ServerPacket;
+
 public class Server {
 	public static ServerPacket packet;
 	public static Socket connection = null;
@@ -30,10 +32,16 @@ public class Server {
 	    		packet = (ServerPacket) in.readObject();
 	    		
 	    		// Add to activeUsers structure
-	    		activeUsers.put(packet.getUsername(), packet.getInfo());
+	    		ClientInfo information;
+	    		if( activeUsers.containsKey(packet.getUsername()) ){
+	    			information = activeUsers.get( packet.getUsername() );
+	    		}else{
+	    			information = new ClientInfo();
+	    			activeUsers.put(packet.getUsername(), information);
+	    		}
 	    		
 	    		// Services packet
-	    		Thread clientThread = new Thread(new ServerPacket_Handler(packet)); 
+	    		Thread clientThread = new Thread(new ServerPacket_Handler(packet, information)); 
 	    		clientThread.start();
 	    	}
 	    }catch(Exception e){
