@@ -30,14 +30,14 @@ public class Server extends Thread{
 	    try{
 	    	socket = new ServerSocket(8010);
 	      
-	    	while(true){    		
+	    	while(true){ 		
 	    		// Accepts incoming connection
 	    		connection  = socket.accept();
 	    		
 	    		// Retrieves packet
 	    		in = new ObjectInputStream(connection.getInputStream());
 	    		packet = (ServerPacket) in.readObject();
-	    		
+	    		in.close();
 	    		// Add to activeUsers structure
 	    		ClientInfo information;
 	    		if( activeUsers.containsKey(packet.getUsername()) ){
@@ -49,10 +49,16 @@ public class Server extends Thread{
 	    		
 	    		Server s = new Server( packet, connection );
 	    		s.start();
-
+	    		connection.close();
 	    	}
 	    }catch(Exception e){
 	    	System.err.print("Gotta catch them all.");
+	    	try {
+				socket.close();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 	    }
 	}
 	

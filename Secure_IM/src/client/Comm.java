@@ -26,7 +26,7 @@ public class Comm extends Thread{
 			startServerSocket();
 			ServerPacket signingOn = new ServerPacket( Client_Driver.getCurrentUser().getUsername(), Status.online );
 			sendServerPacket( signingOn );
-			
+			stopServerSocket();
 		} catch (UnknownHostException e) {
 			throw new NoInternetException("Cannot find server");
 		}
@@ -43,6 +43,17 @@ public class Comm extends Thread{
 		} catch (IOException io ){
 			io.printStackTrace();
 		}
+	}
+	
+	private void stopServerSocket() throws NoInternetException{
+		try {
+			clientToServer.close();
+			os.close();
+			is.close();
+		} catch (IOException e) {
+			throw new NoInternetException( "Can't close socket" );
+		}
+		
 	}
 
 	public void sendMessage( IMPacket toSend ) throws NoInternetException{
@@ -94,6 +105,7 @@ public class Comm extends Thread{
 			ObjectOutputStream out = new ObjectOutputStream( os );
 			out.writeObject( sp );
 			out.close();
+			stopServerSocket();
 		} catch (IOException e) {
 			throw new NoInternetException( "Can't send server packet" );
 		}
@@ -126,9 +138,13 @@ public class Comm extends Thread{
 	private ServerPacket receiveServerPacket( InputStream is ) throws NoInternetException{
 		ServerPacket sp = null;
 		try{
+			if( clientToServer.isClosed() == true ){
+				startServerSocket();
+			}
 			ObjectInputStream ois = new ObjectInputStream( is );
 			Object obj = ois.readObject();
 			sp = (ServerPacket) obj;
+			stopServerSocket();
 		} catch (IOException e) {
 			throw new NoInternetException( "Can't receive server packet" );
 		} catch (ClassNotFoundException e) {
