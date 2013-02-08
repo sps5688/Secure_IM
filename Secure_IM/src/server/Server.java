@@ -75,7 +75,7 @@ public class Server extends Thread{
 	public void run(){
 		switch( sp.getWorkflowType() ){
 			case getIP:
-				System.out.println("Getting IP for " + sp.getBuddyName() + " as " + sp.getUsername());
+				System.out.println("Getting IP for " + sp.getUsername());
 				sp.setIP( activeUsers.get( username ).getIP() );
 				ObjectOutputStream out;
 				try {
@@ -103,7 +103,7 @@ public class Server extends Thread{
 						sp.getStatus() == Status.away ){
 					activeUsers.get( username ).setIP( clientConn.getInetAddress() );
 				}
-				System.out.println("Changing " + activeUsers.get( username ) + " status to " + sp.getStatus());
+				System.out.println("Changing " + sp.getUsername() + " status to " + sp.getStatus());
 				
 				activeUsers.get( username ).changeStatus( sp.getStatus() );
 				for( String thisUser : activeUsers.get( username ).getNotifyList() ){
