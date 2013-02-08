@@ -22,14 +22,22 @@ public class Comm extends Thread{
 	
 	public Comm( String username ) throws NoInternetException{
 		try {
-			SERVER = InetAddress.getByName("192.168.1.105");
+			SERVER = InetAddress.getByName("192.168.1.107");
+			startServerSocket();
+			ServerPacket signingOn = new ServerPacket( Client_Driver.getCurrentUser().getUsername(), Status.online );
+			sendServerPacket( signingOn );
+			
+		} catch (UnknownHostException e) {
+			throw new NoInternetException("Cannot find server");
+		}
+	}
+	
+	private void startServerSocket() throws NoInternetException{
+		try{
 			clientToServer = new Socket( SERVER, SERVER_PORT );
+			clientToServer.setKeepAlive( true );
 			os = clientToServer.getOutputStream();
 			is = clientToServer.getInputStream();
-			System.out.println( "Hay d00d" );
-			ServerPacket signingOn = new ServerPacket( Client_Driver.getCurrentUser().getUsername(), Status.online );
-			sendServerPacket( signingOn, os );
-			
 		} catch (UnknownHostException e) {
 			throw new NoInternetException("Cannot find server");
 		} catch (IOException io ){
@@ -43,7 +51,7 @@ public class Comm extends Thread{
 			
 				String curBuddy = toSend.getDestUsername();
 				ServerPacket senderIP = new ServerPacket( curBuddy );
-				sendServerPacket( senderIP, os );
+				sendServerPacket( senderIP );
 				senderIP = receiveServerPacket( is );
 				InetAddress dest = senderIP.getIP();
 				
@@ -78,8 +86,11 @@ public class Comm extends Thread{
 		}
 	}
 	
-	private void sendServerPacket( ServerPacket sp, OutputStream os ) throws NoInternetException{
+	private void sendServerPacket( ServerPacket sp ) throws NoInternetException{
 		try {
+			if( clientToServer.isClosed() == true ){
+				startServerSocket();
+			}
 			ObjectOutputStream out = new ObjectOutputStream( os );
 			out.writeObject( sp );
 			out.close();
