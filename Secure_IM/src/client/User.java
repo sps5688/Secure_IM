@@ -15,12 +15,10 @@ public class User implements Serializable{
 	private ArrayList<String> buddies = new ArrayList<String>();
 	private HashMap<String, String> messageLog = new HashMap<String, String>();
 	private String userName;
-//	private String IPAddress;
 	private String currentBuddy;
 	
 	public User(String userName){
 		this.userName = userName;
-//		this.IPAddress = IPAddress;
 		buddies.add("MySpace Tom");
 	}
 	
@@ -31,11 +29,7 @@ public class User implements Serializable{
 	public String getUsername(){
 		return userName;
 	}
-	
-/*	public String getIPAddress(){
-		return IPAddress;
-	}*/
-	
+		
 	public void addBuddy(String buddyName) throws NoInternetException{
 		buddies.add(buddyName);
 		try {
@@ -70,6 +64,11 @@ public class User implements Serializable{
 			String history = messageLog.get(buddyName);
 			history += (userName + ": " + message + "\n");
 			messageLog.put(buddyName, history);
+		}
+		try {
+			Client_Driver.getComm().sendMessage( new IMPacket( userName, buddyName, message ) );
+		} catch (NoInternetException e) {
+			System.err.println( e.getMessage() );
 		}
 	}
 	

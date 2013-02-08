@@ -19,6 +19,10 @@ public class Client_Driver {
 		return currentUser;
 	}
 	
+	public static Comm getComm(){
+		return c;
+	}
+	
 	public static void updateBuddyStatus( String buddyName, Status buddyStatus ){
 		g.refreshBuddy(buddyName, buddyStatus == Status.offline ? false : true );
 	}
