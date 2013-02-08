@@ -14,9 +14,6 @@ import common.ServerPacket;
 import common.Status;
 
 public class Server extends Thread{
-	public static ServerPacket packet;
-	public static Socket connection = null;
-	public static ObjectInputStream in;
 	public static ServerSocket socket;
 	
 	public static HashMap<String, ClientInfo> activeUsers = new HashMap<String, ClientInfo>();
@@ -32,11 +29,11 @@ public class Server extends Thread{
 	      
 	    	while(true){ 		
 	    		// Accepts incoming connection
-	    		connection  = socket.accept();
+	    		Socket connection  = socket.accept();
 	    		
 	    		// Retrieves packet
-	    		in = new ObjectInputStream(connection.getInputStream());
-	    		packet = (ServerPacket) in.readObject();
+	    		ObjectInputStream in = new ObjectInputStream(connection.getInputStream());
+	    		ServerPacket packet = (ServerPacket) in.readObject();
 	    		in.close();
 	    		// Add to activeUsers structure
 	    		ClientInfo information;
@@ -46,7 +43,6 @@ public class Server extends Thread{
 	    			information = new ClientInfo();
 	    			activeUsers.put(packet.getUsername(), information);	
 	    		}
-	    		
 	    		Server s = new Server( packet, connection );
 	    		s.start();
 	    		connection.close();
