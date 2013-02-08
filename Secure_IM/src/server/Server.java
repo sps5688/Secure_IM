@@ -47,8 +47,6 @@ public class Server extends Thread{
 	    			activeUsers.put(packet.getUsername(), information);	
 	    		}
 	    		
-	    		System.out.println(packet.getUsername() + " has signed in!");
-	    		
 	    		Server s = new Server( packet, connection );
 	    		s.start();
 
@@ -71,6 +69,7 @@ public class Server extends Thread{
 	public void run(){
 		switch( sp.getWorkflowType() ){
 			case getIP:
+				System.out.println("Getting IP for " + sp.getBuddyName() + " as " + sp.getUsername());
 				sp.setIP( activeUsers.get( username ).getIP() );
 				ObjectOutputStream out;
 				try {
@@ -85,8 +84,10 @@ public class Server extends Thread{
 			
 			case editBuddy:
 				if( sp.getOperation() == ServerPacket.add ){
+					System.out.println("Adding " + sp.getBuddyName() + " to " + sp.getUsername() + "'s buddy list");
 					activeUsers.get( sp.getBuddyName() ).addUserToNotifyList( sp.getUsername() );
 				}else{
+					System.out.println("Removing " + sp.getBuddyName() + " to " + sp.getUsername() + "'s buddy list");
 					activeUsers.get( sp.getBuddyName() ).removeUserFromNotifyList( sp.getUsername() );
 				}
 				break;
@@ -96,6 +97,8 @@ public class Server extends Thread{
 						sp.getStatus() == Status.away ){
 					activeUsers.get( username ).setIP( clientConn.getInetAddress() );
 				}
+				System.out.println("Changing " + activeUsers.get( username ) + " status to " + sp.getStatus());
+				
 				activeUsers.get( username ).changeStatus( sp.getStatus() );
 				for( String thisUser : activeUsers.get( username ).getNotifyList() ){
 					if( activeUsers.get( thisUser ).getStatus() != Status.offline ){
