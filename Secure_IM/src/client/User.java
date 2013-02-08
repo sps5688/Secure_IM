@@ -15,12 +15,12 @@ public class User implements Serializable{
 	private ArrayList<String> buddies = new ArrayList<String>();
 	private HashMap<String, String> messageLog = new HashMap<String, String>();
 	private String userName;
-	private String IPAddress;
+//	private String IPAddress;
 	private String currentBuddy;
 	
-	public User(String userName, String IPAddress){
+	public User(String userName){
 		this.userName = userName;
-		this.IPAddress = IPAddress;
+//		this.IPAddress = IPAddress;
 		buddies.add("MySpace Tom");
 	}
 	
@@ -32,9 +32,9 @@ public class User implements Serializable{
 		return userName;
 	}
 	
-	public String getIPAddress(){
+/*	public String getIPAddress(){
 		return IPAddress;
-	}
+	}*/
 	
 	public void addBuddy(String buddyName) throws NoInternetException{
 		buddies.add(buddyName);

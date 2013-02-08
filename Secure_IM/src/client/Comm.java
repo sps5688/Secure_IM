@@ -22,10 +22,11 @@ public class Comm extends Thread{
 	
 	public Comm( String username ) throws NoInternetException{
 		try {
-			SERVER = InetAddress.getByName("STEVE-DESKTOP");
+			SERVER = InetAddress.getByName("192.168.1.105");
 			clientToServer = new Socket( SERVER, SERVER_PORT );
 			os = clientToServer.getOutputStream();
 			is = clientToServer.getInputStream();
+			System.out.println( "Hay d00d" );
 			ServerPacket signingOn = new ServerPacket( Client_Driver.getCurrentUser().getUsername(), Status.online );
 			sendServerPacket( signingOn, os );
 			

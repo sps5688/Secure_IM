@@ -32,21 +32,22 @@ public class GUI implements KeyListener, WindowListener, ActionListener, MouseLi
 	
 	private String selectedBuddy;
 	
-	public GUI(){
+	public GUI( boolean exists ){
 		// If first time running program, prompt for user name
 		if(Client_Driver.getCurrentUser() == null){
 			String userName = JOptionPane.showInputDialog(null, "Username:", null);
 			String IPAddress = "";
 			
-			try {
+/*			try {
 				URL whatismyip = new URL("http://api.exip.org/?call=ip");
 				BufferedReader in = new BufferedReader(new InputStreamReader(whatismyip.openStream()));
 				IPAddress = in.readLine();
 			} catch (IOException e) {
 				e.printStackTrace();
+			}*/
+			if( !exists ){
+				Client_Driver.createUser( userName );				
 			}
-			
-			Client_Driver.createUser(userName, IPAddress);
 			
 			// Valid user name check
 			if(userName == null || userName.equals("")){
