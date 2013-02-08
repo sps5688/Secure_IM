@@ -45,7 +45,6 @@ public class Server extends Thread{
 	    		}
 	    		Server s = new Server( packet, connection );
 	    		s.start();
-	    		connection.close();
 	    	}
 	    }catch(Exception e){
 	    	System.err.print("Gotta catch them all.");
@@ -116,6 +115,12 @@ public class Server extends Thread{
 					}
 				}
 				break;
+		}
+		try {
+			clientConn.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 }
