@@ -34,7 +34,6 @@ public class Server extends Thread{
 	    		// Retrieves packet
 	    		ObjectInputStream in = new ObjectInputStream(connection.getInputStream());
 	    		ServerPacket packet = (ServerPacket) in.readObject();
-	    		in.close();
 	    		// Add to activeUsers structure
 	    		ClientInfo information;
 	    		if( activeUsers.containsKey(packet.getUsername()) ){
@@ -45,6 +44,7 @@ public class Server extends Thread{
 	    		}
 	    		Server s = new Server( packet, connection );
 	    		s.start();
+	    		in.close();
 	    	}
 	    }catch(Exception e){
 	    	System.err.print("Gotta catch them all.");
