@@ -1,3 +1,0 @@
-package server;
-
-public enum Status{ online, offline, away; }
