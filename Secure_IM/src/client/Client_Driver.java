@@ -2,9 +2,11 @@ package client;
 
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
+import common.Status;
 
 public class Client_Driver {
-	public static User currentUser;
+	private static User currentUser;
+	private static GUI g;
 	
 	public static void createUser(String userName, String IPAddress){
 		currentUser = new User(userName, IPAddress);
@@ -13,6 +15,10 @@ public class Client_Driver {
 	
 	public static User getCurrentUser(){
 		return currentUser;
+	}
+	
+	public static void updateBuddyStatus( String buddyName, Status buddyStatus ){
+		g.refreshBuddy(buddyName, buddyStatus == Status.offline ? false : true );
 	}
 	
 	/**
@@ -31,6 +37,6 @@ public class Client_Driver {
 			currentUser = (User) obj;
 		}catch (Exception e) { } // Can Ignore
 		
-		new GUI();
+		g = new GUI();
 	}
 }

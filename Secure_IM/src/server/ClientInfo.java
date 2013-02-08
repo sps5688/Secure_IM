@@ -1,5 +1,6 @@
 package server;
 
+import java.net.InetAddress;
 import java.util.HashSet;
 
 import common.Status;
@@ -7,6 +8,7 @@ import common.Status;
 public class ClientInfo {
 	private HashSet<String> toBeNotified;
 	private Status status;
+	private InetAddress ipAddr;
 	
 	public ClientInfo(){
 		toBeNotified = new HashSet<String>();
@@ -15,16 +17,21 @@ public class ClientInfo {
 	
 	public void changeStatus(Status userStatus){
 		status = userStatus;
+		if( status == Status.offline ){
+			ipAddr = null;
+		}
 	}
 	
-	public String getStatus(){
-		if(status.equals(Status.online)){
-			return "online";
-		}else if(status.equals(Status.away)){
-			return "away";
-		}else{
-			return "offline";
-		}
+	public Status getStatus(){
+		return status;
+	}
+	
+	public void setIP( InetAddress newIP ){
+		this.ipAddr = newIP;
+	}
+	
+	public InetAddress getIP(){
+		return ipAddr;
 	}
 	
 	public void addUserToNotifyList(String username){
@@ -35,10 +42,8 @@ public class ClientInfo {
 		toBeNotified.remove(username);
 	}
 	
-	public void notifyUsers(){
-		// Notify user
-		for(String user : toBeNotified){
-			System.out.println("Notifying " + user);
-		}
+	public HashSet<String> getNotifyList(){
+		return toBeNotified;
 	}
+	
 }

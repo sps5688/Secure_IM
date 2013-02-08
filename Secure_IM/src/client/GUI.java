@@ -30,6 +30,8 @@ public class GUI implements KeyListener, WindowListener, ActionListener, MouseLi
 	private JPanel leftPanel, topPanel, bottomPanel, middlePanel;
 	private final DefaultListModel model = new DefaultListModel();
 	
+	private String selectedBuddy;
+	
 	public GUI(){
 		// If first time running program, prompt for user name
 		if(Client_Driver.getCurrentUser() == null){
@@ -185,7 +187,11 @@ public class GUI implements KeyListener, WindowListener, ActionListener, MouseLi
 	public void actionPerformed(ActionEvent arg0) {
 		if(arg0.getActionCommand().equals("Add Buddy")){
 			String buddyName = JOptionPane.showInputDialog(null, "Buddy Name:", null);
-			Client_Driver.getCurrentUser().addBuddy(buddyName);
+			try {
+				Client_Driver.getCurrentUser().addBuddy(buddyName);
+			} catch (NoInternetException e) {
+				System.err.println( e.getMessage() );
+			}
 			
 			model.addElement(buddyName);
 			mainFrame.validate();
@@ -193,7 +199,12 @@ public class GUI implements KeyListener, WindowListener, ActionListener, MouseLi
 			String buddyName = (String) buddyListArea.getSelectedValue();
 			
 			if(buddyName != null){
-				Client_Driver.getCurrentUser().removeBuddy(buddyName);
+				try{
+					Client_Driver.getCurrentUser().removeBuddy(buddyName);
+				} catch (NoInternetException e) {
+					System.err.println( e.getMessage() );
+				}
+
 				Client_Driver.getCurrentUser().deleteMessageHistory(buddyName);
 				
 				model.remove(model.indexOf(buddyName));
@@ -205,10 +216,11 @@ public class GUI implements KeyListener, WindowListener, ActionListener, MouseLi
 	
 	@Override
 	public void mouseReleased(MouseEvent arg0) {
-		String selectedBuddy = (String) buddyListArea.getSelectedValue();
+		selectedBuddy = (String) buddyListArea.getSelectedValue();
 		
 		if(selectedBuddy != null){
 			messageHistoryArea.setText(Client_Driver.getCurrentUser().getMessageHistory(selectedBuddy));
+			Client_Driver.getCurrentUser().setCurrentBuddy(selectedBuddy);
 		}
 	}
 	
@@ -223,4 +235,9 @@ public class GUI implements KeyListener, WindowListener, ActionListener, MouseLi
 
 	@Override
 	public void mousePressed(MouseEvent arg0) { }
+	
+	public void refreshBuddy( String buddy, boolean enable ){
+		int i = model.indexOf( buddy );
+		buddyListArea.getComponent( i ).setEnabled( enable );
+	}
 }

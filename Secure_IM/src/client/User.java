@@ -1,8 +1,13 @@
 package client;
 
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.net.Socket;
+
+import common.ServerPacket;
 
 @SuppressWarnings("serial")
 public class User implements Serializable{
@@ -11,6 +16,7 @@ public class User implements Serializable{
 	private HashMap<String, String> messageLog = new HashMap<String, String>();
 	private String userName;
 	private String IPAddress;
+	private String currentBuddy;
 	
 	public User(String userName, String IPAddress){
 		this.userName = userName;
@@ -30,12 +36,31 @@ public class User implements Serializable{
 		return IPAddress;
 	}
 	
-	public void addBuddy(String buddyName){
+	public void addBuddy(String buddyName) throws NoInternetException{
 		buddies.add(buddyName);
+		try {
+			Socket serverConn = new Socket( Comm.SERVER, Comm.SERVER_PORT );
+			ServerPacket addPacket = new ServerPacket( userName, buddyName, ServerPacket.add );
+			ObjectOutputStream out = new ObjectOutputStream( serverConn.getOutputStream() );
+			out.writeObject( addPacket );
+			out.close();
+		} catch (IOException e) {
+			throw new NoInternetException( "Can't connect to the server." );
+		}
 	}
 	
-	public void removeBuddy(String buddyName){
+	public void removeBuddy(String buddyName) throws NoInternetException{
 		buddies.remove(buddyName);
+		try {
+			Socket serverConn = new Socket( Comm.SERVER, Comm.SERVER_PORT );
+			ServerPacket addPacket = new ServerPacket( userName, buddyName, ServerPacket.delete );
+			ObjectOutputStream out = new ObjectOutputStream( serverConn.getOutputStream() );
+			out.writeObject( addPacket );
+			out.close();
+		} catch (IOException e) {
+			throw new NoInternetException( "Can't connect to the server." );
+		}
+
 	}
 	
 	public void addSentMessage(String buddyName, String message){
@@ -56,6 +81,14 @@ public class User implements Serializable{
 			history += (buddyName + ": " + message + "\n");
 			messageLog.put(buddyName, history);
 		}
+	}
+	
+	public void setCurrentBuddy( String buddy ){
+		currentBuddy = buddy;
+	}
+	
+	public String getCurrentBuddy(){
+		return currentBuddy;
 	}
 	
 	public String getMessageHistory(String buddyName){
