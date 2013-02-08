@@ -30,7 +30,7 @@ public class Server extends Thread{
 	    try{
 	    	socket = new ServerSocket(8010);
 	      
-	    	while(true){
+	    	while(true){    		
 	    		// Accepts incoming connection
 	    		connection  = socket.accept();
 	    		
@@ -44,8 +44,10 @@ public class Server extends Thread{
 	    			information = activeUsers.get( packet.getUsername() );
 	    		}else{
 	    			information = new ClientInfo();
-	    			activeUsers.put(packet.getUsername(), information);
+	    			activeUsers.put(packet.getUsername(), information);	
 	    		}
+	    		
+	    		System.out.println(packet.getUsername() + " has signed in!");
 	    		
 	    		Server s = new Server( packet, connection );
 	    		s.start();
