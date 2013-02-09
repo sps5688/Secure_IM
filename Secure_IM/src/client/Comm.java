@@ -73,7 +73,7 @@ public class Comm extends Thread{
 				String curBuddy = toSend.getDestUsername();
 				ServerPacket senderIP = new ServerPacket( curBuddy );
 				sendServerPacket( senderIP );
-				senderIP = receiveServerPacket( ServerIS );
+				senderIP = receiveServerPacket();
 				InetAddress dest = senderIP.getIP();
 				
 				meToOther = new Socket( dest, COMM_PORT );
@@ -91,14 +91,13 @@ public class Comm extends Thread{
 	public void run(){
 		while( true ){
 			try {
-				InputStream clientIS = meToOther.getInputStream();
-				if( clientIS.available() > 0 ){
-					IMPacket received = receiveIMPacket( clientIS );
+				if( ClientIS.available() > 0 ){
+					IMPacket received = receiveIMPacket();
 					Client_Driver.getCurrentUser().addReceivedMessage( 
 							received.getSrcUsername(), received.getData() );
 				}
 				if( ServerIS.available() > 0 ){
-					ServerPacket received = receiveServerPacket( ServerIS );
+					ServerPacket received = receiveServerPacket();
 					Client_Driver.updateBuddyStatus( received.getUsername(), received.getStatus() );	
 				}
 			} catch (IOException e) {
@@ -110,7 +109,7 @@ public class Comm extends Thread{
 	public void sendServerPacket( ServerPacket sp ) throws NoInternetException{
 		try {
 			if( ServerOOS == null ){
-				ServerOOS = new ObjectOutputStream( ServerOOS );
+				ServerOOS = new ObjectOutputStream( ServerOS );
 			}
 			ServerOOS.reset();
 			ServerOOS.writeObject( sp );
@@ -120,11 +119,11 @@ public class Comm extends Thread{
 		}
 	}
 	
-	private ServerPacket receiveServerPacket( InputStream is ) throws NoInternetException{
+	private ServerPacket receiveServerPacket() throws NoInternetException{
 		ServerPacket sp = null;
 		try{
 			if( ServerOIS == null ){
-				ServerOIS = new ObjectInputStream( is );				
+				ServerOIS = new ObjectInputStream( ServerIS );				
 			}
 			sp = (ServerPacket) ServerOIS.readObject();
 		} catch (IOException e) {
@@ -146,7 +145,7 @@ public class Comm extends Thread{
 		}
 	}
 	
-	private IMPacket receiveIMPacket( InputStream is ) throws NoInternetException{
+	private IMPacket receiveIMPacket() throws NoInternetException{
 		IMPacket im = null;
 		try{
 			if( ClientOIS == null ){
