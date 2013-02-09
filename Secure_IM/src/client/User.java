@@ -1,11 +1,9 @@
 package client;
 
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.net.Socket;
 
 import common.ServerPacket;
 
@@ -33,11 +31,8 @@ public class User implements Serializable{
 	public void addBuddy(String buddyName) throws NoInternetException{
 		buddies.add(buddyName);
 		try {
-			Socket serverConn = new Socket( Comm.SERVER, Comm.SERVER_PORT );
 			ServerPacket addPacket = new ServerPacket( userName, buddyName, ServerPacket.add );
-			ObjectOutputStream out = new ObjectOutputStream( serverConn.getOutputStream() );
-			out.writeObject( addPacket );
-			out.close();
+			Client_Driver.getComm().sendServerPacket( addPacket );
 		} catch (IOException e) {
 			throw new NoInternetException( "Can't connect to the server." );
 		}
@@ -46,15 +41,11 @@ public class User implements Serializable{
 	public void removeBuddy(String buddyName) throws NoInternetException{
 		buddies.remove(buddyName);
 		try {
-			Socket serverConn = new Socket( Comm.SERVER, Comm.SERVER_PORT );
-			ServerPacket addPacket = new ServerPacket( userName, buddyName, ServerPacket.delete );
-			ObjectOutputStream out = new ObjectOutputStream( serverConn.getOutputStream() );
-			out.writeObject( addPacket );
-			out.close();
+			ServerPacket removePacket = new ServerPacket( userName, buddyName, ServerPacket.delete );
+			Client_Driver.getComm().sendServerPacket( removePacket );
 		} catch (IOException e) {
 			throw new NoInternetException( "Can't connect to the server." );
 		}
-
 	}
 	
 	public void addSentMessage(String buddyName, String message){

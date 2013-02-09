@@ -26,7 +26,7 @@ public class Comm extends Thread{
 			startServerSocket();
 			ServerPacket signingOn = new ServerPacket( Client_Driver.getCurrentUser().getUsername(), Status.online );
 			sendServerPacket( signingOn );
-			stopServerSocket();
+			//stopServerSocket();
 		} catch (UnknownHostException e) {
 			throw new NoInternetException("Cannot find server");
 		}
@@ -74,7 +74,7 @@ public class Comm extends Thread{
 					toSend.getDestUsername(), toSend.getData() );
 			
 		} catch (IOException e) {
-			throw new NoInternetException("Message not delivered");
+			e.printStackTrace();
 		}
 	}
 	
@@ -97,15 +97,15 @@ public class Comm extends Thread{
 		}
 	}
 	
-	private void sendServerPacket( ServerPacket sp ) throws NoInternetException{
+	public void sendServerPacket( ServerPacket sp ) throws NoInternetException{
 		try {
-			if( clientToServer.isClosed() == true ){
+			/*if( clientToServer.isClosed() == true ){
 				startServerSocket();
-			}
+			}*/
 			ObjectOutputStream out = new ObjectOutputStream( os );
 			out.writeObject( sp );
-			out.close();
-			stopServerSocket();
+			//out.close();
+			//stopServerSocket();
 		} catch (IOException e) {
 			throw new NoInternetException( "Can't send server packet" );
 		}
@@ -128,9 +128,9 @@ public class Comm extends Thread{
 			Object obj = ois.readObject();
 			im = (IMPacket) obj;
 		} catch (IOException e) {
-			throw new NoInternetException( "Can't receive server packet" );
+			throw new NoInternetException( "Can't receive IM packet" );
 		} catch (ClassNotFoundException e) {
-			throw new NoInternetException( "Can't receive server packet" );
+			throw new NoInternetException( "Can't receive IM packet" );
 		}
 		return im;
 	}
@@ -138,13 +138,13 @@ public class Comm extends Thread{
 	private ServerPacket receiveServerPacket( InputStream is ) throws NoInternetException{
 		ServerPacket sp = null;
 		try{
-			if( clientToServer.isClosed() == true ){
+			/*if( clientToServer.isClosed() == true ){
 				startServerSocket();
-			}
+			}*/
 			ObjectInputStream ois = new ObjectInputStream( is );
 			Object obj = ois.readObject();
 			sp = (ServerPacket) obj;
-			stopServerSocket();
+			//stopServerSocket();
 		} catch (IOException e) {
 			throw new NoInternetException( "Can't receive server packet" );
 		} catch (ClassNotFoundException e) {

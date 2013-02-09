@@ -10,6 +10,7 @@ import java.util.HashMap;
 import client.Comm;
 
 import common.ServerPacket;
+import common.ServerWorkflow;
 //import common.ServerWorkflow;
 import common.Status;
 
@@ -28,30 +29,16 @@ public class Server extends Thread{
 	    	socket = new ServerSocket(8010);
 	      
 	    	while(true){ 		
-	    		// Accepts incoming connection
+	    		// Accepts unique incoming connection
 	    		Socket connection  = socket.accept();
-	    		
-	    		// Retrieves packet
-	    		ObjectInputStream in = new ObjectInputStream(connection.getInputStream());
-	    		ServerPacket packet = (ServerPacket) in.readObject();
-	    		// Add to activeUsers structure
-	    		ClientInfo information;
-	    		if( activeUsers.containsKey(packet.getUsername()) ){
-	    			information = activeUsers.get( packet.getUsername() );
-	    		}else{
-	    			information = new ClientInfo();
-	    			activeUsers.put(packet.getUsername(), information);	
-	    		}
-	    		Server s = new Server( packet, connection );
+	    		Server s = new Server( connection );
 	    		s.start();
-	    		in.close();
 	    	}
 	    }catch(Exception e){
 	    	System.err.print("Gotta catch them all.");
 	    	try {
 				socket.close();
 			} catch (IOException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 	    }
@@ -60,66 +47,91 @@ public class Server extends Thread{
 	private ServerPacket sp;
 	private Socket clientConn;
 	private String username;
+	private ObjectInputStream in;
 	
-	public Server( ServerPacket sp, Socket connection ){
-		this.sp = sp;
+	public Server( Socket connection ){
 		this.clientConn = connection;
-		this.username = sp.getUsername();
+		
+		try {
+			in = new ObjectInputStream(clientConn.getInputStream());
+			sp = (ServerPacket) in.readObject();
+		} catch( ClassNotFoundException cnfe ){
+			cnfe.printStackTrace();
+		} catch( IOException e ) {
+			e.printStackTrace();
+		}
+		this.username = sp.getUsername();		
+		ClientInfo information;
+		if( activeUsers.containsKey( username ) ){
+			information = activeUsers.get( username );
+		}else{
+			information = new ClientInfo();
+			activeUsers.put( username, information);	
+		}
+		
 	}
 	
 	public void run(){
-		switch( sp.getWorkflowType() ){
-			case getIP:
-				System.out.println("Getting IP for " + sp.getUsername());
-				sp.setIP( activeUsers.get( username ).getIP() );
-				ObjectOutputStream out;
-				try {
-					out = new ObjectOutputStream( clientConn.getOutputStream() );
-					out.writeObject( sp );
-					out.close();
-				} catch (IOException e) {
-					System.err.println( e.getMessage() );
-				}
-				
-				break;
-			
-			case editBuddy:
-				if( sp.getOperation() == ServerPacket.add ){
-					System.out.println("Adding " + sp.getBuddyName() + " to " + sp.getUsername() + "'s buddy list");
-					activeUsers.get( sp.getBuddyName() ).addUserToNotifyList( sp.getUsername() );
-				}else{
-					System.out.println("Removing " + sp.getBuddyName() + " to " + sp.getUsername() + "'s buddy list");
-					activeUsers.get( sp.getBuddyName() ).removeUserFromNotifyList( sp.getUsername() );
-				}
-				break;
-				
-			case statusChange:
-				if ( sp.getStatus() == Status.online ||
-						sp.getStatus() == Status.away ){
-					activeUsers.get( username ).setIP( clientConn.getInetAddress() );
-				}
-				System.out.println("Changing " + sp.getUsername() + " status to " + sp.getStatus());
-				
-				activeUsers.get( username ).changeStatus( sp.getStatus() );
-				for( String thisUser : activeUsers.get( username ).getNotifyList() ){
-					if( activeUsers.get( thisUser ).getStatus() != Status.offline ){
-						try {
-							Socket toNotify = new Socket( activeUsers.get( thisUser ).getIP(), Comm.SERVER_PORT );
-							out = new ObjectOutputStream( toNotify.getOutputStream() );
-							out.writeObject( sp );
-							out.close();
-						} catch (IOException e) {
-							System.err.println( e.getMessage() );
-						}
-						
+		while( sp.getWorkflowType() != ServerWorkflow.statusChange || sp.getStatus() != Status.offline ){
+			switch( sp.getWorkflowType() ){
+				case getIP:
+					System.out.println("Getting IP for " + sp.getUsername());
+					sp.setIP( activeUsers.get( username ).getIP() );
+					ObjectOutputStream out;
+					try {
+						out = new ObjectOutputStream( clientConn.getOutputStream() );
+						out.writeObject( sp );
+						out.close();
+					} catch (IOException e) {
+						System.err.println( e.getMessage() );
 					}
-				}
-				break;
+					
+					break;
+				
+				case editBuddy:
+					if( sp.getOperation() == ServerPacket.add ){
+						System.out.println("Adding " + sp.getBuddyName() + " to " + sp.getUsername() + "'s buddy list");
+						activeUsers.get( sp.getBuddyName() ).addUserToNotifyList( sp.getUsername() );
+					}else{
+						System.out.println("Removing " + sp.getBuddyName() + " to " + sp.getUsername() + "'s buddy list");
+						activeUsers.get( sp.getBuddyName() ).removeUserFromNotifyList( sp.getUsername() );
+					}
+					break;
+					
+				case statusChange:
+					if ( sp.getStatus() == Status.online ||
+							sp.getStatus() == Status.away ){
+						activeUsers.get( username ).setIP( clientConn.getInetAddress() );
+					}
+					System.out.println("Changing " + sp.getUsername() + " status to " + sp.getStatus());
+					
+					activeUsers.get( username ).changeStatus( sp.getStatus() );
+					for( String thisUser : activeUsers.get( username ).getNotifyList() ){
+						if( activeUsers.get( thisUser ).getStatus() != Status.offline ){
+							try {
+								Socket toNotify = new Socket( activeUsers.get( thisUser ).getIP(), Comm.SERVER_PORT );
+								out = new ObjectOutputStream( toNotify.getOutputStream() );
+								out.writeObject( sp );
+								out.close();
+							} catch (IOException e) {
+								System.err.println( e.getMessage() );
+							}
+							
+						}
+					}
+					break;
+			}
+			try {
+				sp = (ServerPacket) in.readObject();
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+			}
 		}
 		try {
 			clientConn.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
