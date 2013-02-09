@@ -122,6 +122,8 @@ public class Server extends Thread{
 					break;
 			}
 			try {
+				while( in.available() == 0 ){
+				}
 				sp = (ServerPacket) in.readObject();
 			} catch (IOException e) {
 				e.printStackTrace();

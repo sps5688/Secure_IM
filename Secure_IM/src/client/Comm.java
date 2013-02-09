@@ -17,8 +17,16 @@ public class Comm extends Thread{
 	
 	private Socket clientToServer;
 	private Socket meToOther;
-	private OutputStream os;
-	private InputStream is;
+
+	private OutputStream ServerOS;
+	private InputStream ServerIS;
+	private ObjectOutputStream ServerOOS;
+	private ObjectInputStream ServerOIS;
+	
+	private OutputStream ClientOS;
+	private InputStream ClientIS;
+	private ObjectOutputStream ClientOOS;
+	private ObjectInputStream ClientOIS;
 	
 	public Comm( String username ) throws NoInternetException{
 		try {
@@ -36,8 +44,8 @@ public class Comm extends Thread{
 		try{
 			clientToServer = new Socket( SERVER, SERVER_PORT );
 			clientToServer.setKeepAlive( true );
-			os = clientToServer.getOutputStream();
-			is = clientToServer.getInputStream();
+			ServerOS = clientToServer.getOutputStream();
+			ServerIS = clientToServer.getInputStream();
 		} catch (UnknownHostException e) {
 			throw new NoInternetException("Cannot find server");
 		} catch (IOException io ){
@@ -48,8 +56,10 @@ public class Comm extends Thread{
 	private void stopServerSocket() throws NoInternetException{
 		try {
 			clientToServer.close();
-			os.close();
-			is.close();
+			ServerOS.close();
+			ServerIS.close();
+			ServerOOS.close();
+			ServerOIS.close();
 		} catch (IOException e) {
 			throw new NoInternetException( "Can't close socket" );
 		}
@@ -63,13 +73,13 @@ public class Comm extends Thread{
 				String curBuddy = toSend.getDestUsername();
 				ServerPacket senderIP = new ServerPacket( curBuddy );
 				sendServerPacket( senderIP );
-				senderIP = receiveServerPacket( is );
+				senderIP = receiveServerPacket( ServerIS );
 				InetAddress dest = senderIP.getIP();
 				
 				meToOther = new Socket( dest, COMM_PORT );
 			}
 			
-			sendIMPacket( toSend, meToOther.getOutputStream() );
+			sendIMPacket( toSend );
 			Client_Driver.getCurrentUser().addSentMessage( 
 					toSend.getDestUsername(), toSend.getData() );
 			
@@ -87,8 +97,8 @@ public class Comm extends Thread{
 					Client_Driver.getCurrentUser().addReceivedMessage( 
 							received.getSrcUsername(), received.getData() );
 				}
-				if( is.available() > 0 ){
-					ServerPacket received = receiveServerPacket( is );
+				if( ServerIS.available() > 0 ){
+					ServerPacket received = receiveServerPacket( ServerIS );
 					Client_Driver.updateBuddyStatus( received.getUsername(), received.getStatus() );	
 				}
 			} catch (IOException e) {
@@ -99,23 +109,38 @@ public class Comm extends Thread{
 	
 	public void sendServerPacket( ServerPacket sp ) throws NoInternetException{
 		try {
-			/*if( clientToServer.isClosed() == true ){
-				startServerSocket();
-			}*/
-			ObjectOutputStream out = new ObjectOutputStream( os );
-			out.writeObject( sp );
-			//out.close();
-			//stopServerSocket();
+			if( ServerOOS == null ){
+				ServerOOS = new ObjectOutputStream( ServerOOS );
+			}
+			ServerOOS.reset();
+			ServerOOS.writeObject( sp );
+
 		} catch (IOException e) {
 			throw new NoInternetException( "Can't send server packet" );
 		}
 	}
 	
-	private void sendIMPacket( IMPacket i, OutputStream os ) throws NoInternetException{
+	private ServerPacket receiveServerPacket( InputStream is ) throws NoInternetException{
+		ServerPacket sp = null;
+		try{
+			if( ServerOIS == null ){
+				ServerOIS = new ObjectInputStream( is );				
+			}
+			sp = (ServerPacket) ServerOIS.readObject();
+		} catch (IOException e) {
+			throw new NoInternetException( "Can't receive server packet" );
+		} catch (ClassNotFoundException e) {
+			throw new NoInternetException( "Can't receive server packet" );
+		}
+		return sp;
+	}
+	
+	private void sendIMPacket( IMPacket i ) throws NoInternetException{
 		try {
-			ObjectOutputStream out = new ObjectOutputStream( os );
-			out.writeObject( i );
-			out.close();
+			if( ClientOOS == null ){
+				ClientOOS = new ObjectOutputStream( ClientOS );
+			}
+			ClientOOS.writeObject( i );
 		} catch (IOException e) {
 			throw new NoInternetException( "Can't send IM" );
 		}
@@ -124,9 +149,11 @@ public class Comm extends Thread{
 	private IMPacket receiveIMPacket( InputStream is ) throws NoInternetException{
 		IMPacket im = null;
 		try{
-			ObjectInputStream ois = new ObjectInputStream( is );
-			Object obj = ois.readObject();
-			im = (IMPacket) obj;
+			if( ClientOIS == null ){
+				ClientOIS = new ObjectInputStream( ClientIS );
+			}
+			im = (IMPacket) ClientOIS.readObject();
+			
 		} catch (IOException e) {
 			throw new NoInternetException( "Can't receive IM packet" );
 		} catch (ClassNotFoundException e) {
@@ -135,21 +162,4 @@ public class Comm extends Thread{
 		return im;
 	}
 
-	private ServerPacket receiveServerPacket( InputStream is ) throws NoInternetException{
-		ServerPacket sp = null;
-		try{
-			/*if( clientToServer.isClosed() == true ){
-				startServerSocket();
-			}*/
-			ObjectInputStream ois = new ObjectInputStream( is );
-			Object obj = ois.readObject();
-			sp = (ServerPacket) obj;
-			//stopServerSocket();
-		} catch (IOException e) {
-			throw new NoInternetException( "Can't receive server packet" );
-		} catch (ClassNotFoundException e) {
-			throw new NoInternetException( "Can't receive server packet" );
-		}
-		return sp;
-	}
 }
