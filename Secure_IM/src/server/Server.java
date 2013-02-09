@@ -47,14 +47,16 @@ public class Server extends Thread{
 	private ServerPacket sp;
 	private Socket clientConn;
 	private String username;
-	private ObjectInputStream in;
+	private ObjectInputStream ois;
+	private ObjectOutputStream oos;
 	
 	public Server( Socket connection ){
 		this.clientConn = connection;
 		
 		try {
-			in = new ObjectInputStream(clientConn.getInputStream());
-			sp = (ServerPacket) in.readObject();
+			ois = new ObjectInputStream(clientConn.getInputStream() );
+			oos = new ObjectOutputStream( clientConn.getOutputStream() );
+			sp = (ServerPacket) ois.readObject();
 		} catch( ClassNotFoundException cnfe ){
 			cnfe.printStackTrace();
 		} catch( IOException e ) {
@@ -77,11 +79,8 @@ public class Server extends Thread{
 				case getIP:
 					System.out.println("Getting IP for " + sp.getUsername());
 					sp.setIP( activeUsers.get( username ).getIP() );
-					ObjectOutputStream out;
 					try {
-						out = new ObjectOutputStream( clientConn.getOutputStream() );
-						out.writeObject( sp );
-						out.close();
+						oos.writeObject( sp );
 					} catch (IOException e) {
 						System.err.println( e.getMessage() );
 					}
@@ -108,23 +107,23 @@ public class Server extends Thread{
 					activeUsers.get( username ).changeStatus( sp.getStatus() );
 					for( String thisUser : activeUsers.get( username ).getNotifyList() ){
 						if( activeUsers.get( thisUser ).getStatus() != Status.offline ){
-							try {
+							/*try {
 								Socket toNotify = new Socket( activeUsers.get( thisUser ).getIP(), Comm.SERVER_PORT );
-								out = new ObjectOutputStream( toNotify.getOutputStream() );
+								ObjectOutputStream out = new ObjectOutputStream( toNotify.getOutputStream() );
 								out.writeObject( sp );
 								out.close();
 							} catch (IOException e) {
 								System.err.println( e.getMessage() );
-							}
+							}*/
 							
 						}
 					}
 					break;
 			}
 			try {
-				while( in.available() == 0 ){
-				}
-				sp = (ServerPacket) in.readObject();
+				//while( ois.available() == 0 ){
+				//}
+				sp = (ServerPacket) ois.readObject();
 			} catch (IOException e) {
 				e.printStackTrace();
 			} catch (ClassNotFoundException e) {

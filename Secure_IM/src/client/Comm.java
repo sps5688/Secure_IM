@@ -111,7 +111,6 @@ public class Comm extends Thread{
 			if( ServerOOS == null ){
 				ServerOOS = new ObjectOutputStream( ServerOS );
 			}
-			ServerOOS.reset();
 			ServerOOS.writeObject( sp );
 
 		} catch (IOException e) {
