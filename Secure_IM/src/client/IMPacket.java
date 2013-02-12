@@ -1,6 +1,8 @@
 package client;
 
-public class IMPacket {
+import java.io.Serializable;
+
+public class IMPacket implements Serializable{
 
 	private String data;
 	private String srcUsername, destUsername;

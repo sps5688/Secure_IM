@@ -85,6 +85,8 @@ public class Client_Driver {
 				Socket connection = commListened.accept();
 	    		Comm c = new Comm( connection );
 	    		IMPacket received = c.receiveIMPacket();
+	    		currentUser.addReceivedMessage( 
+						received.getSrcUsername(), received.getData() );
 	    		comms.put( received.getSrcUsername(), c );
 	    		c.start();
 			}catch( NoInternetException nie ){

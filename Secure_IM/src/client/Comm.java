@@ -118,8 +118,8 @@ public class Comm extends Thread{
 	
 	public Comm( Socket received ) throws NoInternetException{
 		this();
-		startClientStreams();
 		meToOther = received;
+		startClientStreams();
 	}
 	
 	private void startClientStreams(){
@@ -146,8 +146,6 @@ public class Comm extends Thread{
 			}
 			
 			sendIMPacket( toSend );
-			Client_Driver.getCurrentUser().addSentMessage( 
-					toSend.getDestUsername(), toSend.getData() );
 			
 		} catch (IOException e) {
 			e.printStackTrace();

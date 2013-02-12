@@ -31,19 +31,17 @@ public class GUI implements KeyListener, WindowListener, ActionListener, MouseLi
 	
 	public GUI( boolean exists ){
 		// If first time running program, prompt for user name
-		if(Client_Driver.getCurrentUser() == null){
+		
+		if( !exists ){
 			String userName = JOptionPane.showInputDialog(null, "Username:", null);
-			
-			if( !exists ){
-				Client_Driver.createUser( userName );				
-			}else{
-				Client_Driver.initComm();
-			}
+			Client_Driver.createUser( userName );
 			
 			// Valid user name check
 			if(userName == null || userName.equals("")){
 				System.exit(0);
 			}
+		}else{
+			Client_Driver.initComm();
 		}
 		
 		// Initial frame creation
