@@ -76,7 +76,7 @@ public class Server extends Thread{
 				case getIP:
 					System.out.println("Getting IP for " + sp.getUsername());
 					System.out.println("IP: " + activeUsers.get( sp.getUsername() ).getIP() );
-					sp.setIP( activeUsers.get( username ).getIP() );
+					sp.setIP( activeUsers.get( sp.getUsername() ).getIP() );
 					try {
 						oos.writeObject( sp );
 					} catch (IOException e) {
@@ -115,14 +115,11 @@ public class Server extends Thread{
 							} catch (IOException e) {
 								System.err.println( e.getMessage() );
 							}*/
-							
 						}
 					}
 					break;
 			}
 			try {
-				//while( ois.available() == 0 ){
-				//}
 				sp = (ServerPacket) ois.readObject();
 			} catch (IOException e) {
 				e.printStackTrace();
