@@ -10,8 +10,6 @@ import java.net.Socket;
 import common.Status;
 import java.util.HashMap;
 
-import server.Server;
-
 public class Client_Driver {
 	private static User currentUser;
 	private static GUI g;
@@ -81,11 +79,12 @@ public class Client_Driver {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		IMPacket received = null;
 		while( isOpened ){
 			try {
 				Socket connection = commListened.accept();
 	    		Comm c = new Comm( connection );
-	    		IMPacket received = c.receiveIMPacket();
+	    		received = c.receiveIMPacket();
 	    		currentUser.addReceivedMessage( 
 						received.getSrcUsername(), received.getData() );
 	    		comms.put( received.getSrcUsername(), c );

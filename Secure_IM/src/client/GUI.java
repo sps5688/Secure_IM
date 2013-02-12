@@ -150,7 +150,9 @@ public class GUI implements KeyListener, WindowListener, ActionListener, MouseLi
 			out.close();
 			Comm.stopServerSocket();
 			Client_Driver.updateOpened( false );
-			for( Comm c : Client_Driver.comms.values() ){
+			for( String thisUser : Client_Driver.comms.keySet() ){
+				Comm c = Client_Driver.comms.get( thisUser );
+				c.sendMessage( new IMPacket( Client_Driver.getCurrentUser().getUsername(), thisUser ) );
 				c.stopClientStreams();
 			}
 			System.exit(0);

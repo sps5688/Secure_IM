@@ -182,10 +182,14 @@ public class Comm extends Thread{
 	
 	public void run(){
 		started = true;
-
+		IMPacket received = null;
+		
 		try {
-			while( !meToOther.isClosed() ){
-					IMPacket received = receiveIMPacket();
+			while( !meToOther.isClosed() && !received.getBye() ){
+					received = receiveIMPacket();
+					if( received.getBye() ){
+						break;
+					}
 					Client_Driver.getCurrentUser().addReceivedMessage( 
 							received.getSrcUsername(), received.getData() );
 					/*if( ServerIS.available() > 0 ){
@@ -198,9 +202,7 @@ public class Comm extends Thread{
 		}
 
 	}
-	
-	
-	
+		
 	private void sendIMPacket( IMPacket i ) throws NoInternetException{
 		try {
 			if( ClientOOS == null ){
@@ -221,8 +223,10 @@ public class Comm extends Thread{
 			im = (IMPacket) ClientOIS.readObject();
 			
 		} catch (IOException e) {
+			e.printStackTrace();
 			throw new NoInternetException( "Can't receive IM packet" );
 		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
 			throw new NoInternetException( "Can't receive IM packet" );
 		}
 		return im;

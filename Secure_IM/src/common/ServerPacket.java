@@ -5,11 +5,11 @@ import java.net.InetAddress;
 
 public class ServerPacket implements Serializable{
 
+	private static final long serialVersionUID = 6561981141432776662L;
+
 	public final static boolean delete = false;
 	public final static boolean add = true;
-	
-	private static final long serialVersionUID = 1L;
-	
+		
 	private ServerWorkflow sw;
 	
 	//used in 1,2,3
