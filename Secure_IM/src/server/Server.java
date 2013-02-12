@@ -7,11 +7,9 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
 
-import client.Comm;
 
 import common.ServerPacket;
 import common.ServerWorkflow;
-//import common.ServerWorkflow;
 import common.Status;
 
 public class Server extends Thread{
@@ -78,6 +76,7 @@ public class Server extends Thread{
 			switch( sp.getWorkflowType() ){
 				case getIP:
 					System.out.println("Getting IP for " + sp.getUsername());
+					System.out.println("IP: " + activeUsers.get( sp.getUsername() ).getIP() );
 					sp.setIP( activeUsers.get( username ).getIP() );
 					try {
 						oos.writeObject( sp );
@@ -100,7 +99,9 @@ public class Server extends Thread{
 				case statusChange:
 					if ( sp.getStatus() == Status.online ||
 							sp.getStatus() == Status.away ){
-						activeUsers.get( username ).setIP( clientConn.getInetAddress() );
+						ClientInfo info = activeUsers.get( username );
+						info.setIP( clientConn.getInetAddress() );
+						activeUsers.put( username, info );
 					}
 					System.out.println("Changing " + sp.getUsername() + " status to " + sp.getStatus());
 					
