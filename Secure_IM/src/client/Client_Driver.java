@@ -15,7 +15,7 @@ import server.Server;
 public class Client_Driver {
 	private static User currentUser;
 	private static GUI g;
-	//public static Comm serverComm;
+	private static boolean isOpened;
 	
 	public static HashMap<String, Comm> comms;
 	
@@ -25,18 +25,19 @@ public class Client_Driver {
 		// Update Server with user name so there are no duplicates
 	}
 	
+	public static void updateOpened( boolean newOpened ){
+		isOpened = newOpened;
+	}
+	
 	public static void initComm(){
 		comms = new HashMap<String, Comm>();
+		isOpened = true;
 	}
 	
 	public static User getCurrentUser(){
 		return currentUser;
 	}
-	
-/*	public static Comm getComm(){
-		return serverComm;
-	}*/
-	
+		
 	public static void updateBuddyStatus( String buddyName, Status buddyStatus ){
 		g.refreshBuddy(buddyName, buddyStatus == Status.offline ? false : true );
 	}
@@ -80,7 +81,7 @@ public class Client_Driver {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		while( true ){
+		while( isOpened ){
 			try {
 				Socket connection = commListened.accept();
 	    		Comm c = new Comm( connection );
@@ -95,11 +96,10 @@ public class Client_Driver {
 				e.printStackTrace();
 			}
 		}
-		//TODO close the socket somehow
-		//commListened.close();
-		
-
-
-
+		try {
+			commListened.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }

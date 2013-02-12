@@ -130,6 +130,28 @@ public class Comm extends Thread{
 			io.printStackTrace();
 		}
 	}
+	
+	public void stopClientStreams(){
+		try {			
+			if( meToOther != null && !meToOther.isClosed() ){
+				meToOther.close();
+				if( ClientOS != null ){
+					ClientOS.close();
+					if( ClientOOS != null ){
+						ClientOOS.close();					
+					}
+				}
+				if( ClientIS != null ){
+					ClientIS.close();
+					if( ClientOIS != null ){
+						ClientOIS.close();					
+					}
+				}				
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 
 	public void sendMessage( IMPacket toSend ) throws NoInternetException{
 		try {
@@ -159,7 +181,7 @@ public class Comm extends Thread{
 	public void run(){
 		started = true;
 		
-		while( true ){
+		while( !meToOther.isClosed() ){
 			try {
 				IMPacket received = receiveIMPacket();
 				Client_Driver.getCurrentUser().addReceivedMessage( 
