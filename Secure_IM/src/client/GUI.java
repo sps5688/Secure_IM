@@ -36,6 +36,8 @@ public class GUI implements KeyListener, WindowListener, ActionListener, MouseLi
 			
 			if( !exists ){
 				Client_Driver.createUser( userName );				
+			}else{
+				Client_Driver.initComm();
 			}
 			
 			// Valid user name check
