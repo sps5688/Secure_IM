@@ -148,8 +148,8 @@ public class GUI implements KeyListener, WindowListener, ActionListener, MouseLi
 			ObjectOutput out = new ObjectOutputStream(new FileOutputStream("user.ser"));
 			out.writeObject(Client_Driver.getCurrentUser());
 			out.close();
-			System.exit(0);
 			Comm.stopServerSocket();
+			System.exit(0);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

@@ -20,6 +20,7 @@ public class Client_Driver {
 	public static HashMap<String, Comm> comms;
 	
 	public static void createUser(String userName ){
+		comms = new HashMap<String, Comm>();
 		currentUser = new User(userName );
 		// Update Server with user name so there are no duplicates
 	}

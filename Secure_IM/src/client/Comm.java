@@ -25,7 +25,7 @@ public class Comm extends Thread{
 	
 	public static void initComm() throws NoInternetException{
 		try {
-			SERVER = InetAddress.getByName("192.168.1.107");
+			SERVER = InetAddress.getByName("192.168.1.105");
 			startServerSocket();
 			ServerPacket signingOn = new ServerPacket( Client_Driver.getCurrentUser().getUsername(), Status.online );
 			sendServerPacket( signingOn );
@@ -52,11 +52,22 @@ public class Comm extends Thread{
 		try {
 			ServerPacket signingOff = new ServerPacket( Client_Driver.getCurrentUser().getUsername(), Status.offline );
 			sendServerPacket( signingOff );
-			ServerOOS.close();
-			ServerOIS.close();
-			ServerOS.close();
-			ServerIS.close();
-			clientToServer.close();
+			
+			if( clientToServer != null && !clientToServer.isClosed() ){
+				clientToServer.close();
+				if( ServerOS != null ){
+					ServerOS.close();
+					if( ServerOOS != null ){
+						ServerOOS.close();					
+					}
+				}
+				if( ServerIS != null ){
+					ServerIS.close();
+					if( ServerOIS != null ){
+						ServerOIS.close();					
+					}
+				}				
+			}
 		} catch (IOException e) {
 			throw new NoInternetException( "Can't close socket" );
 		}

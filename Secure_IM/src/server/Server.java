@@ -96,12 +96,9 @@ public class Server extends Thread{
 					break;
 					
 				case statusChange:
-					if ( sp.getStatus() == Status.online ||
-							sp.getStatus() == Status.away ){
-						ClientInfo info = activeUsers.get( username );
-						info.setIP( clientConn.getInetAddress() );
-						activeUsers.put( username, info );
-					}
+					ClientInfo info = activeUsers.get( username );
+					info.setIP( clientConn.getInetAddress() );
+					activeUsers.put( username, info );
 					System.out.println("Changing " + sp.getUsername() + " status to " + sp.getStatus());
 					
 					activeUsers.get( username ).changeStatus( sp.getStatus() );
@@ -127,6 +124,7 @@ public class Server extends Thread{
 				e.printStackTrace();
 			}
 		}
+		System.out.println( "Changing " + sp.getUsername() + " status to " + sp.getStatus() + ", run method is done." );
 		try {
 			clientConn.close();
 		} catch (IOException e) {
