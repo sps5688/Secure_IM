@@ -26,7 +26,7 @@ public class Server extends Thread{
 	
 	public static void main(String[] args){
 	    try{
-	    	socket = new ServerSocket(8010);
+	    	socket = new ServerSocket( Comm.SERVER_PORT );
 	      
 	    	while(true){ 		
 	    		// Accepts unique incoming connection

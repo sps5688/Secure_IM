@@ -13,22 +13,17 @@ public class Comm extends Thread{
 
 	public static final int SERVER_PORT = 8010;
 	public static final int COMM_PORT = 8011;
+	
 	public static InetAddress SERVER;
 	
-	private Socket clientToServer;
-	private Socket meToOther;
+	private static Socket clientToServer;
 
-	private OutputStream ServerOS;
-	private InputStream ServerIS;
-	private ObjectOutputStream ServerOOS;
-	private ObjectInputStream ServerOIS;
+	private static OutputStream ServerOS;
+	private static InputStream ServerIS;
+	private static ObjectOutputStream ServerOOS;
+	private static ObjectInputStream ServerOIS;
 	
-	private OutputStream ClientOS;
-	private InputStream ClientIS;
-	private ObjectOutputStream ClientOOS;
-	private ObjectInputStream ClientOIS;
-	
-	public Comm( String username ) throws NoInternetException{
+	public static void initComm() throws NoInternetException{
 		try {
 			SERVER = InetAddress.getByName("192.168.1.107");
 			startServerSocket();
@@ -40,7 +35,7 @@ public class Comm extends Thread{
 		}
 	}
 	
-	private void startServerSocket() throws NoInternetException{
+	private static void startServerSocket() throws NoInternetException{
 		try{
 			clientToServer = new Socket( SERVER, SERVER_PORT );
 			clientToServer.setKeepAlive( true );
@@ -53,17 +48,76 @@ public class Comm extends Thread{
 		}
 	}
 	
-	private void stopServerSocket() throws NoInternetException{
+	public static void stopServerSocket() throws NoInternetException{
 		try {
-			clientToServer.close();
-			ServerOS.close();
-			ServerIS.close();
+			ServerPacket signingOff = new ServerPacket( Client_Driver.getCurrentUser().getUsername(), Status.offline );
+			sendServerPacket( signingOff );
 			ServerOOS.close();
 			ServerOIS.close();
+			ServerOS.close();
+			ServerIS.close();
+			clientToServer.close();
 		} catch (IOException e) {
 			throw new NoInternetException( "Can't close socket" );
 		}
 		
+	}
+	
+	public static void sendServerPacket( ServerPacket sp ) throws NoInternetException{
+		try {
+			if( ServerOOS == null ){
+				ServerOOS = new ObjectOutputStream( ServerOS );
+			}
+			ServerOOS.writeObject( sp );
+
+		} catch (IOException e) {
+			throw new NoInternetException( "Can't send server packet" );
+		}
+	}
+	
+	private static ServerPacket receiveServerPacket() throws NoInternetException{
+		ServerPacket sp = null;
+		try{
+			if( ServerOIS == null ){
+				ServerOIS = new ObjectInputStream( ServerIS );				
+			}
+			sp = (ServerPacket) ServerOIS.readObject();
+		} catch (IOException e) {
+			throw new NoInternetException( "Can't receive server packet" );
+		} catch (ClassNotFoundException e) {
+			throw new NoInternetException( "Can't receive server packet" );
+		}
+		return sp;
+	}
+
+
+	private Socket meToOther;
+	
+	private OutputStream ClientOS;
+	private InputStream ClientIS;
+	private ObjectOutputStream ClientOOS;
+	private ObjectInputStream ClientOIS;
+	
+	private boolean started;
+	
+	public Comm() throws NoInternetException{
+		started = false;
+		
+	}
+	
+	public Comm( Socket received ) throws NoInternetException{
+		this();
+		startClientStreams();
+		meToOther = received;
+	}
+	
+	private void startClientStreams(){
+		try{
+			ClientOS = meToOther.getOutputStream();
+			ClientIS = meToOther.getInputStream();
+		} catch (IOException io ){
+			io.printStackTrace();
+		}
 	}
 
 	public void sendMessage( IMPacket toSend ) throws NoInternetException{
@@ -77,6 +131,7 @@ public class Comm extends Thread{
 				InetAddress dest = senderIP.getIP();
 				
 				meToOther = new Socket( dest, COMM_PORT );
+				startClientStreams();
 			}
 			
 			sendIMPacket( toSend );
@@ -88,7 +143,13 @@ public class Comm extends Thread{
 		}
 	}
 	
+	public boolean hasStarted(){
+		return started;
+	}
+	
 	public void run(){
+		started = true;
+		
 		while( true ){
 			try {
 				if( ClientIS.available() > 0 ){
@@ -106,32 +167,7 @@ public class Comm extends Thread{
 		}
 	}
 	
-	public void sendServerPacket( ServerPacket sp ) throws NoInternetException{
-		try {
-			if( ServerOOS == null ){
-				ServerOOS = new ObjectOutputStream( ServerOS );
-			}
-			ServerOOS.writeObject( sp );
-
-		} catch (IOException e) {
-			throw new NoInternetException( "Can't send server packet" );
-		}
-	}
 	
-	private ServerPacket receiveServerPacket() throws NoInternetException{
-		ServerPacket sp = null;
-		try{
-			if( ServerOIS == null ){
-				ServerOIS = new ObjectInputStream( ServerIS );				
-			}
-			sp = (ServerPacket) ServerOIS.readObject();
-		} catch (IOException e) {
-			throw new NoInternetException( "Can't receive server packet" );
-		} catch (ClassNotFoundException e) {
-			throw new NoInternetException( "Can't receive server packet" );
-		}
-		return sp;
-	}
 	
 	private void sendIMPacket( IMPacket i ) throws NoInternetException{
 		try {
@@ -144,7 +180,7 @@ public class Comm extends Thread{
 		}
 	}
 	
-	private IMPacket receiveIMPacket() throws NoInternetException{
+	public IMPacket receiveIMPacket() throws NoInternetException{
 		IMPacket im = null;
 		try{
 			if( ClientOIS == null ){

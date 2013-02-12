@@ -9,13 +9,10 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.io.BufferedReader;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
-import java.net.URL;
 import java.util.ArrayList;
 
 import javax.swing.*;
@@ -152,6 +149,7 @@ public class GUI implements KeyListener, WindowListener, ActionListener, MouseLi
 			out.writeObject(Client_Driver.getCurrentUser());
 			out.close();
 			System.exit(0);
+			Comm.stopServerSocket();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

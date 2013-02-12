@@ -32,7 +32,7 @@ public class User implements Serializable{
 		buddies.add(buddyName);
 		try {
 			ServerPacket addPacket = new ServerPacket( userName, buddyName, ServerPacket.add );
-			Client_Driver.getComm().sendServerPacket( addPacket );
+			Comm.sendServerPacket( addPacket );
 		} catch (IOException e) {
 			throw new NoInternetException( "Can't connect to the server." );
 		}
@@ -42,7 +42,7 @@ public class User implements Serializable{
 		buddies.remove(buddyName);
 		try {
 			ServerPacket removePacket = new ServerPacket( userName, buddyName, ServerPacket.delete );
-			Client_Driver.getComm().sendServerPacket( removePacket );
+			Comm.sendServerPacket( removePacket );
 		} catch (IOException e) {
 			throw new NoInternetException( "Can't connect to the server." );
 		}
@@ -57,7 +57,14 @@ public class User implements Serializable{
 			messageLog.put(buddyName, history);
 		}
 		try {
-			Client_Driver.getComm().sendMessage( new IMPacket( userName, buddyName, message ) );
+			if( !Client_Driver.comms.containsKey( buddyName ) ){
+				Client_Driver.comms.put( buddyName, new Comm() );				
+			}
+			Client_Driver.comms.get( buddyName ).sendMessage( 
+					new IMPacket( userName, buddyName, message ) );
+			if( !Client_Driver.comms.get( buddyName ).hasStarted() ){
+				Client_Driver.comms.get( buddyName ).start();				
+			}
 		} catch (NoInternetException e) {
 			System.err.println( e.getMessage() );
 		}
