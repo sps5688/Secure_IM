@@ -11,4 +11,12 @@ public class NoInternetException extends java.net.UnknownHostException{
 		super( msg );
 	}
 	
+	public void printStackTrace(){
+		super.printStackTrace();
+	}
+	
+	public String getMessage(){
+		return super.getMessage();
+	}
+	
 }

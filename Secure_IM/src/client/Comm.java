@@ -53,20 +53,22 @@ public class Comm extends Thread{
 			ServerPacket signingOff = new ServerPacket( Client_Driver.getCurrentUser().getUsername(), Status.offline );
 			sendServerPacket( signingOff );
 			
-			if( clientToServer != null && !clientToServer.isClosed() ){
-				clientToServer.close();
+			if( ServerOOS != null ){
+				ServerOOS.close();
 				if( ServerOS != null ){
-					ServerOS.close();
-					if( ServerOOS != null ){
-						ServerOOS.close();					
-					}
+					ServerOS.close();	
 				}
+			}
+			
+			if( ServerOIS != null ){
+				ServerOIS.close();
 				if( ServerIS != null ){
 					ServerIS.close();
-					if( ServerOIS != null ){
-						ServerOIS.close();					
-					}
-				}				
+				}
+			}
+			
+			if( clientToServer != null && !clientToServer.isClosed() ){
+				clientToServer.close();
 			}
 		} catch (IOException e) {
 			throw new NoInternetException( "Can't close socket" );
@@ -132,21 +134,21 @@ public class Comm extends Thread{
 	}
 	
 	public void stopClientStreams(){
-		try {			
-			if( meToOther != null && !meToOther.isClosed() ){
-				meToOther.close();
+		try {
+			if( ClientOOS != null ){
+				ClientOOS.close();
 				if( ClientOS != null ){
 					ClientOS.close();
-					if( ClientOOS != null ){
-						ClientOOS.close();					
-					}
 				}
+			}
+			if( ClientOIS != null ){
+				ClientOIS.close();
 				if( ClientIS != null ){
 					ClientIS.close();
-					if( ClientOIS != null ){
-						ClientOIS.close();					
-					}
-				}				
+				}
+			}			
+			if( meToOther != null && !meToOther.isClosed() ){
+				meToOther.close();
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -180,20 +182,21 @@ public class Comm extends Thread{
 	
 	public void run(){
 		started = true;
-		
-		while( !meToOther.isClosed() ){
-			try {
-				IMPacket received = receiveIMPacket();
-				Client_Driver.getCurrentUser().addReceivedMessage( 
-						received.getSrcUsername(), received.getData() );
-				/*if( ServerIS.available() > 0 ){
-					ServerPacket received = receiveServerPacket();
-					Client_Driver.updateBuddyStatus( received.getUsername(), received.getStatus() );	
-				}*/
-			} catch (IOException e) {
-				System.err.println( e.getMessage() );
+
+		try {
+			while( !meToOther.isClosed() ){
+					IMPacket received = receiveIMPacket();
+					Client_Driver.getCurrentUser().addReceivedMessage( 
+							received.getSrcUsername(), received.getData() );
+					/*if( ServerIS.available() > 0 ){
+						ServerPacket received = receiveServerPacket();
+						Client_Driver.updateBuddyStatus( received.getUsername(), received.getStatus() );	
+					}*/
 			}
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
+
 	}
 	
 	

@@ -91,7 +91,7 @@ public class Client_Driver {
 	    		comms.put( received.getSrcUsername(), c );
 	    		c.start();
 			}catch( NoInternetException nie ){
-				System.err.println( nie.getMessage() );
+				nie.printStackTrace();
 			}catch( IOException e ){
 				e.printStackTrace();
 			}
