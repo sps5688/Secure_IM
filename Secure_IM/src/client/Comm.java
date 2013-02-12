@@ -161,15 +161,13 @@ public class Comm extends Thread{
 		
 		while( true ){
 			try {
-				if( ClientIS.available() > 0 ){
-					IMPacket received = receiveIMPacket();
-					Client_Driver.getCurrentUser().addReceivedMessage( 
-							received.getSrcUsername(), received.getData() );
-				}
-				if( ServerIS.available() > 0 ){
+				IMPacket received = receiveIMPacket();
+				Client_Driver.getCurrentUser().addReceivedMessage( 
+						received.getSrcUsername(), received.getData() );
+				/*if( ServerIS.available() > 0 ){
 					ServerPacket received = receiveServerPacket();
 					Client_Driver.updateBuddyStatus( received.getUsername(), received.getStatus() );	
-				}
+				}*/
 			} catch (IOException e) {
 				System.err.println( e.getMessage() );
 			}
