@@ -17,14 +17,13 @@ public class Server extends Thread{
 	
 	public static HashMap<String, ClientInfo> activeUsers = new HashMap<String, ClientInfo>();
 	
-	
 	public static void removeActiveUser(String username){
 		activeUsers.remove(username);
 	}
 	
 	public static void main(String[] args){
 	    try{
-	    	socket = new ServerSocket( Comm.SERVER_PORT );
+	    	socket = new ServerSocket( 8010 );
 	      
 	    	while(true){ 		
 	    		// Accepts unique incoming connection
