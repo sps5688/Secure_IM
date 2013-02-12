@@ -59,13 +59,15 @@ public class Client_Driver {
 		}catch (Exception e) {
 			System.err.println( e.getMessage() );
 		}
+		
+		g = new GUI( exists );
+		
 		try{
 			Comm.initComm();
 		} catch (NoInternetException e) {
 			System.err.println( e.getMessage() );
 		}
-		g = new GUI( exists );
-
+		
 		
 		ServerSocket commListened = null;
 		try {
@@ -86,7 +88,8 @@ public class Client_Driver {
 				e.printStackTrace();
 			}
 		}
-		
+		//TODO close the socket somehow
+		//commListened.close();
 		
 
 
