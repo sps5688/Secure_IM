@@ -86,6 +86,7 @@ public class Client_Driver {
 			try {
 				Socket connection = commListened.accept();
 	    		Comm c = new Comm( connection );
+	    		c.initDiffie();
 	    		received = c.receiveIMPacket();
 	    		if( received != null ){
 		    		currentUser.addReceivedMessage( 
