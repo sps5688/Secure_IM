@@ -119,11 +119,11 @@ public class Comm extends Thread{
 	
 	public Comm() throws NoInternetException{
 		d = new Diffie();
+		key = -1;
 	}
 	
 	public Comm( Socket received ) throws NoInternetException{
 		started = false;
-		key = -1;
 		meToOther = received;
 		startClientStreams();
 		
