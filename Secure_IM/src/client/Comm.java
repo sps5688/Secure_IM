@@ -1,4 +1,5 @@
 package client;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -187,12 +188,13 @@ public class Comm extends Thread{
 		try {
 			while( !meToOther.isClosed() ){
 					received = receiveIMPacket();
-					if( received.getBye() ){
+					if( received != null ){
+						Client_Driver.getCurrentUser().addReceivedMessage( 
+								received.getSrcUsername(), received.getData() );
+						Client_Driver.updateMessageHistory( received.getSrcUsername() );
+					}else{
 						break;
 					}
-					Client_Driver.getCurrentUser().addReceivedMessage( 
-							received.getSrcUsername(), received.getData() );
-					Client_Driver.updateMessageHistory( received.getSrcUsername() );
 					/*if( ServerIS.available() > 0 ){
 						ServerPacket received = receiveServerPacket();
 						Client_Driver.updateBuddyStatus( received.getUsername(), received.getStatus() );	
@@ -223,11 +225,11 @@ public class Comm extends Thread{
 			}
 			im = (IMPacket) ClientOIS.readObject();
 			
-		} catch (IOException e) {
-			e.printStackTrace();
-			throw new NoInternetException( "Can't receive IM packet" );
+		}catch( EOFException eof ){
+			//Connection closed unexpectedly, can ignore
+		}catch( IOException e ) {
+			//Connection closed unexpectedly, can ignore
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
 			throw new NoInternetException( "Can't receive IM packet" );
 		}
 		return im;

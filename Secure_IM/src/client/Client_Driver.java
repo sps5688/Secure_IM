@@ -62,8 +62,6 @@ public class Client_Driver {
 				currentUser = (User) obj;
 				exists = true;
 			}
-			System.out.println ("about to create some comm" );
-			System.out.println ("created some comm" );
 		}catch (Exception e) {
 			System.err.println( e.getMessage() );
 		}
@@ -89,11 +87,13 @@ public class Client_Driver {
 				Socket connection = commListened.accept();
 	    		Comm c = new Comm( connection );
 	    		received = c.receiveIMPacket();
-	    		currentUser.addReceivedMessage( 
-						received.getSrcUsername(), received.getData() );
-	    		updateMessageHistory( received.getSrcUsername() );
-	    		comms.put( received.getSrcUsername(), c );
-	    		c.start();
+	    		if( received != null ){
+		    		currentUser.addReceivedMessage( 
+							received.getSrcUsername(), received.getData() );
+		    		updateMessageHistory( received.getSrcUsername() );
+		    		comms.put( received.getSrcUsername(), c );
+		    		c.start();	    			
+	    		}
 			}catch( NoInternetException nie ){
 				nie.printStackTrace();
 			}catch( IOException e ){
