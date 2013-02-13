@@ -325,6 +325,7 @@ public class Comm extends Thread{
 			if( key != -1 ){
 				im.setData( decrypt( im.getByteData(), key ) );
 			}
+			
 		}catch( EOFException eof ){
 			//Connection closed unexpectedly, can ignore
 		}catch( IOException e ) {
