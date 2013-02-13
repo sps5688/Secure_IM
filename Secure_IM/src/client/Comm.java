@@ -144,6 +144,8 @@ public class Comm extends Thread{
 		} catch (BadPaddingException e) {
 			e.printStackTrace();
 		}
+		System.out.println( "Encrypted plaintext " + text + " to ciphertext " +
+				encrypted.toString() + " with key " + key );
 		return encrypted;
 	}
 	
@@ -175,6 +177,8 @@ public class Comm extends Thread{
 		} catch (BadPaddingException e) {
 			e.printStackTrace();
 		}
+		System.out.println( "Decrypted ciphertext " + encrypted.toString() +
+				" to plaintext " + new String( decrypted ) + " with key " + key );
 		return new String( decrypted );
 	}
 
