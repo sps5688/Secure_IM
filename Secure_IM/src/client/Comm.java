@@ -112,17 +112,35 @@ public class Comm extends Thread{
 	private ObjectOutputStream ClientOOS;
 	private ObjectInputStream ClientOIS;
 	
+	private Diffie d;
+	private long key;
+	
 	private boolean started;
 	
 	public Comm() throws NoInternetException{
-		started = false;
-		
+		d = new Diffie();
 	}
 	
 	public Comm( Socket received ) throws NoInternetException{
-		this();
+		started = false;
+		key = -1;
 		meToOther = received;
 		startClientStreams();
+		
+	}
+	
+	public void initDiffie(){
+		IMPacket pgv;
+		try {
+			pgv = receiveIMPacket();
+			d = new Diffie( pgv.getData() );
+			sendIMPacket( new IMPacket( pgv.getSrcUsername(), pgv.getDestUsername(), String.valueOf( d.sendU() ) ) );
+			key = d.getKey();
+
+		} catch (NoInternetException e) {
+			e.printStackTrace();
+		}
+		
 	}
 	
 	private void startClientStreams(){
@@ -169,7 +187,11 @@ public class Comm extends Thread{
 				meToOther = new Socket( dest, COMM_PORT );
 				startClientStreams();
 			}
-			
+			if( key == -1 ){
+				sendIMPacket( new IMPacket( toSend.getSrcUsername(), toSend.getDestUsername(), d.sendPGU() ) );
+				d.getV( Long.parseLong( receiveIMPacket().getData() ) );
+				key = d.getKey();
+			}
 			sendIMPacket( toSend );
 			
 		} catch (IOException e) {
