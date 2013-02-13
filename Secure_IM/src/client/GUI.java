@@ -17,7 +17,6 @@ import java.util.ArrayList;
 
 import javax.swing.*;
 
-//TODO Make Message History Box Scrollable
 public class GUI implements KeyListener, WindowListener, ActionListener, MouseListener{
 	private JFrame mainFrame;
 	private JTextArea messageInputArea;
@@ -47,7 +46,7 @@ public class GUI implements KeyListener, WindowListener, ActionListener, MouseLi
 		// Initial frame creation
 		mainFrame = new JFrame("Secure IM");
 		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		mainFrame.setSize(700, 700);
+		mainFrame.setSize(800, 715);
 		mainFrame.setLayout(new BorderLayout());
 		mainFrame.setResizable(false);
 		
@@ -58,7 +57,7 @@ public class GUI implements KeyListener, WindowListener, ActionListener, MouseLi
 		
 		// Bottom panel creation
 		bottomPanel = new JPanel();
-		messageInputArea = new JTextArea(10,61);
+		messageInputArea = new JTextArea(10,65);
 		messageInputArea.setLineWrap(true);
 		messageInputArea.addKeyListener(this);
 		messageInputArea.setBackground(Color.lightGray);
@@ -84,9 +83,8 @@ public class GUI implements KeyListener, WindowListener, ActionListener, MouseLi
 		messageHistoryArea.setBackground(Color.lightGray);
 		messageHistoryArea.setEditable(false);
 		
-		JScrollPane scroll = new JScrollPane (messageHistoryArea);
+		JScrollPane scroll = new JScrollPane(messageHistoryArea);
 		middlePanel.add(scroll);
-		middlePanel.add(messageHistoryArea);
 		
 		// Left panel creation
 		leftPanel = new JPanel();
