@@ -148,13 +148,14 @@ public class GUI implements KeyListener, WindowListener, ActionListener, MouseLi
 			ObjectOutput out = new ObjectOutputStream(new FileOutputStream("user.ser"));
 			out.writeObject(Client_Driver.getCurrentUser());
 			out.close();
-			Comm.stopServerSocket();
-			Client_Driver.updateOpened( false );
 			for( String thisUser : Client_Driver.comms.keySet() ){
 				Comm c = Client_Driver.comms.get( thisUser );
 				c.sendMessage( new IMPacket( Client_Driver.getCurrentUser().getUsername(), thisUser ) );
 				c.stopClientStreams();
 			}
+			Comm.stopServerSocket();
+			Client_Driver.updateOpened( false );
+			
 			System.exit(0);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -233,8 +234,13 @@ public class GUI implements KeyListener, WindowListener, ActionListener, MouseLi
 	@Override
 	public void mousePressed(MouseEvent arg0) { }
 	
-	public void refreshBuddy( String buddy, boolean enable ){
+	public void refreshMessageHistoryArea( String buddyName ){
+		messageHistoryArea.setText( Client_Driver.getCurrentUser().getMessageHistory( buddyName ) );
+	}
+	
+	public void changeBuddyStatus( String buddy, boolean enable ){
 		int i = model.indexOf( buddy );
 		buddyListArea.getComponent( i ).setEnabled( enable );
+		mainFrame.validate();
 	}
 }

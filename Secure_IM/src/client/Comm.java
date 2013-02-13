@@ -185,13 +185,14 @@ public class Comm extends Thread{
 		IMPacket received = null;
 		
 		try {
-			while( !meToOther.isClosed() && !received.getBye() ){
+			while( !meToOther.isClosed() ){
 					received = receiveIMPacket();
 					if( received.getBye() ){
 						break;
 					}
 					Client_Driver.getCurrentUser().addReceivedMessage( 
 							received.getSrcUsername(), received.getData() );
+					Client_Driver.updateMessageHistory( received.getSrcUsername() );
 					/*if( ServerIS.available() > 0 ){
 						ServerPacket received = receiveServerPacket();
 						Client_Driver.updateBuddyStatus( received.getUsername(), received.getStatus() );	

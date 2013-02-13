@@ -37,7 +37,11 @@ public class Client_Driver {
 	}
 		
 	public static void updateBuddyStatus( String buddyName, Status buddyStatus ){
-		g.refreshBuddy(buddyName, buddyStatus == Status.offline ? false : true );
+		g.changeBuddyStatus(buddyName, buddyStatus == Status.offline ? false : true );
+	}
+	
+	public static void updateMessageHistory( String buddyName ){
+		g.refreshMessageHistoryArea( buddyName );
 	}
 	
 	/**
@@ -87,6 +91,7 @@ public class Client_Driver {
 	    		received = c.receiveIMPacket();
 	    		currentUser.addReceivedMessage( 
 						received.getSrcUsername(), received.getData() );
+	    		updateMessageHistory( received.getSrcUsername() );
 	    		comms.put( received.getSrcUsername(), c );
 	    		c.start();
 			}catch( NoInternetException nie ){
