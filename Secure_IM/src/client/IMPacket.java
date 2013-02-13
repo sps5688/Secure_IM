@@ -9,10 +9,18 @@ public class IMPacket implements Serializable{
 	private String data;
 	private String srcUsername, destUsername;
 	
+	private byte[] byteData;
+	
 	public IMPacket( String srcUsername, String destUsername, String data ){
 		this.srcUsername = srcUsername;
 		this.destUsername = destUsername;
 		this.data = data;
+	}
+	
+	public IMPacket( String srcUsername, String destUsername, byte[] data ){
+		this.srcUsername = srcUsername;
+		this.destUsername = destUsername;
+		this.byteData = data;
 	}
 	
 	/*public IMPacket( String srcUsername, String destUsername ){
@@ -23,6 +31,15 @@ public class IMPacket implements Serializable{
 	
 	public String getData(){
 		return data;
+	}
+	
+	public byte[] getByteData(){
+		return byteData;
+	}
+	
+	public void setByteData( byte[] newData ){
+		this.data = "";
+		this.byteData = newData;
 	}
 		
 	public void setData( String newData ){

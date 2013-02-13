@@ -115,7 +115,7 @@ public class Comm extends Thread{
 		return sp;
 	}
 
-	private static String encrypt( String text, long key ){
+	private static byte[] encrypt( String text, long key ){
 		
 		byte[] keyBytes = null;
 		byte[] encrypted = null;
@@ -144,10 +144,10 @@ public class Comm extends Thread{
 		} catch (BadPaddingException e) {
 			e.printStackTrace();
 		}
-		return new String( encrypted );
+		return encrypted;
 	}
 	
-	private static String decrypt( String encrypted, long key ){
+	private static String decrypt( byte[] encrypted, long key ){
 
 		byte[] keyBytes = null;
 		byte[] decrypted = null;
@@ -161,7 +161,7 @@ public class Comm extends Thread{
 			Cipher cipher = Cipher.getInstance( "AES" );
 	
 			cipher.init( Cipher.DECRYPT_MODE, aes );
-			decrypted = cipher.doFinal( encrypted.getBytes() );
+			decrypted = cipher.doFinal( encrypted );
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		} catch (NoSuchAlgorithmException e) {
@@ -197,6 +197,7 @@ public class Comm extends Thread{
 	
 	public Comm( Socket received ) throws NoInternetException{
 		started = false;
+		key = -1;
 		meToOther = received;
 		startClientStreams();
 		
@@ -266,7 +267,7 @@ public class Comm extends Thread{
 				key = d.getKey();
 			}
 			
-			toSend.setData( encrypt( toSend.getData(), key ) );
+			toSend.setByteData( encrypt( toSend.getData(), key ) );
 			sendIMPacket( toSend );
 			
 		} catch (IOException e) {
@@ -322,7 +323,7 @@ public class Comm extends Thread{
 			}
 			im = (IMPacket) ClientOIS.readObject();
 			if( key != -1 ){
-				im.setData( decrypt( im.getData(), key ) );				
+				im.setData( decrypt( im.getByteData(), key ) );
 			}
 		}catch( EOFException eof ){
 			//Connection closed unexpectedly, can ignore
