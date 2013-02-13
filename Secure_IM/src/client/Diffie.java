@@ -32,12 +32,12 @@ public class Diffie{
 	public Diffie( String pgv ){
 
 		String[] pgvSplit = pgv.split( " " );
-		System.out.println( pgv );
 		p = Integer.parseInt( pgvSplit[1] );
 		g = Integer.parseInt( pgvSplit[3] );
+		a = (int) ( Math.random()*98.0 + 2 );
+
 		getV( Long.parseLong( pgvSplit[5] ) );
 		
-		a = (int) ( Math.random()*98.0 + 2 );
 		System.out.println( "Received p, g : p " + p + " g " + g );
 		System.out.println( "Generating a: " + a );
 		

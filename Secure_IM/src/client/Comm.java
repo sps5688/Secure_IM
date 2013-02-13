@@ -5,7 +5,18 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.*;
+import java.security.InvalidKeyException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.SecretKeySpec;
 
 import common.Status;
 import common.ServerPacket;
@@ -104,6 +115,68 @@ public class Comm extends Thread{
 		return sp;
 	}
 
+	private static String encrypt( String text, long key ){
+		
+		byte[] keyBytes = null;
+		byte[] encrypted = null;
+		
+		try {
+			keyBytes = String.valueOf( key ).getBytes("UTF-8");
+			MessageDigest sha = MessageDigest.getInstance("SHA-1");
+			keyBytes = sha.digest( keyBytes );
+			keyBytes = Arrays.copyOf(keyBytes, 16 );
+			SecretKeySpec aes = new SecretKeySpec( keyBytes, "AES" );
+			Cipher cipher = Cipher.getInstance("AES");
+		    cipher.init(Cipher.ENCRYPT_MODE, aes);
+
+		    encrypted = cipher.doFinal( text.getBytes() );
+
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		} catch (NoSuchPaddingException e) {
+			e.printStackTrace();
+		} catch (InvalidKeyException e) {
+			e.printStackTrace();
+		} catch (IllegalBlockSizeException e) {
+			e.printStackTrace();
+		} catch (BadPaddingException e) {
+			e.printStackTrace();
+		}
+		return new String( encrypted );
+	}
+	
+	private static String decrypt( String encrypted, long key ){
+
+		byte[] keyBytes = null;
+		byte[] decrypted = null;
+		
+		try {
+			keyBytes = String.valueOf( key ).getBytes("UTF-8");
+			MessageDigest sha = MessageDigest.getInstance("SHA-1");
+			keyBytes = sha.digest( keyBytes );
+			keyBytes = Arrays.copyOf(keyBytes, 16 );		
+			SecretKeySpec aes = new SecretKeySpec( keyBytes, "AES" );
+			Cipher cipher = Cipher.getInstance( "AES" );
+	
+			cipher.init( Cipher.DECRYPT_MODE, aes );
+			decrypted = cipher.doFinal( encrypted.getBytes() );
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		} catch (NoSuchPaddingException e) {
+			e.printStackTrace();
+		} catch (InvalidKeyException e) {
+			e.printStackTrace();
+		} catch (IllegalBlockSizeException e) {
+			e.printStackTrace();
+		} catch (BadPaddingException e) {
+			e.printStackTrace();
+		}
+		return new String( decrypted );
+	}
 
 	private Socket meToOther;
 	
@@ -192,6 +265,8 @@ public class Comm extends Thread{
 				d.getV( Long.parseLong( receiveIMPacket().getData() ) );
 				key = d.getKey();
 			}
+			
+			toSend.setData( encrypt( toSend.getData(), key ) );
 			sendIMPacket( toSend );
 			
 		} catch (IOException e) {
@@ -246,7 +321,9 @@ public class Comm extends Thread{
 				ClientOIS = new ObjectInputStream( ClientIS );
 			}
 			im = (IMPacket) ClientOIS.readObject();
-			
+			if( key != -1 ){
+				im.setData( decrypt( im.getData(), key ) );				
+			}
 		}catch( EOFException eof ){
 			//Connection closed unexpectedly, can ignore
 		}catch( IOException e ) {
