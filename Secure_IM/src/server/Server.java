@@ -111,11 +111,15 @@ public class Server extends Thread{
 				sp = (ServerPacket) ois.readObject();
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			//Connection closed unexpectedly
+			System.err.println( "Connection closed");
+			sp.setStatus( Status.offline );
+			
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
 		System.out.println( "Changing " + sp.getUsername() + " status to " + sp.getStatus() + ", run method is done." );
+		activeUsers.get( username ).changeStatus( sp.getStatus() );
 		try {
 			clientConn.close();
 		} catch (IOException e) {

@@ -76,6 +76,10 @@ public class ServerPacket implements Serializable{
 		return IP;
 	}
 	
+	public void setStatus( Status newStatus ){
+		this.newStatus = newStatus;
+	}
+	
 	public ServerWorkflow getWorkflowType(){
 		return sw;
 	}
