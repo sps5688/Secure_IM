@@ -38,7 +38,6 @@ public class Diffie{
 
 		getV( Long.parseLong( pgvSplit[5] ) );
 		
-		
 		System.out.println( "Received p, g : p " + p + " g " + g );
 		System.out.println( "Generating a: " + a );
 		
