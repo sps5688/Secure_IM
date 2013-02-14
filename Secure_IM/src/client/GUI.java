@@ -30,9 +30,9 @@ public class GUI implements KeyListener, WindowListener, ActionListener, MouseLi
 	
 	public GUI( boolean exists ){
 		// If first time running program, prompt for user name
-		
+		String userName;
 		if( !exists ){
-			String userName = JOptionPane.showInputDialog(null, "Username:", null);
+			userName = JOptionPane.showInputDialog(null, "Username:", null);
 			Client_Driver.createUser( userName );
 			
 			// Valid user name check
@@ -40,11 +40,12 @@ public class GUI implements KeyListener, WindowListener, ActionListener, MouseLi
 				System.exit(0);
 			}
 		}else{
-			Client_Driver.initComm();
+			Client_Driver.initComms();
+			userName = Client_Driver.getCurrentUser().getUsername();
 		}
 		
 		// Initial frame creation
-		mainFrame = new JFrame("Secure IM");
+		mainFrame = new JFrame( "Secure IM - " + userName );
 		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		mainFrame.setSize(800, 715);
 		mainFrame.setLayout(new BorderLayout());

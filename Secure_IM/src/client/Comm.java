@@ -35,9 +35,9 @@ public class Comm extends Thread{
 	private static ObjectOutputStream ServerOOS;
 	private static ObjectInputStream ServerOIS;
 	
-	public static void initComm() throws NoInternetException{
+	public static void initComm( String host ) throws NoInternetException{
 		try {
-			SERVER = InetAddress.getByName("192.168.1.105");
+			SERVER = InetAddress.getByName( host );
 			startServerSocket();
 			ServerPacket signingOn = new ServerPacket( Client_Driver.getCurrentUser().getUsername(), Status.online );
 			sendServerPacket( signingOn );
@@ -54,7 +54,11 @@ public class Comm extends Thread{
 			ServerOS = clientToServer.getOutputStream();
 			ServerIS = clientToServer.getInputStream();
 		} catch (UnknownHostException e) {
-			throw new NoInternetException("Cannot find server");
+			System.err.println( "Cannot find server, exiting." );
+			System.exit(1);
+		} catch (ConnectException e) {
+			System.err.println( "Cannot find server, exiting." );
+			System.exit(1);
 		} catch (IOException io ){
 			io.printStackTrace();
 		}
@@ -261,9 +265,12 @@ public class Comm extends Thread{
 				sendServerPacket( senderIP );
 				senderIP = receiveServerPacket();
 				InetAddress dest = senderIP.getIP();
-				
-				meToOther = new Socket( dest, COMM_PORT );
-				startClientStreams();
+				if( dest != null ){
+					meToOther = new Socket( dest, COMM_PORT );
+					startClientStreams();
+				}else{
+					return;
+				}
 			}
 			if( key == -1 ){
 				sendIMPacket( new IMPacket( toSend.getSrcUsername(), toSend.getDestUsername(), d.sendPGU() ) );
@@ -286,6 +293,9 @@ public class Comm extends Thread{
 	public void run(){
 		started = true;
 		IMPacket received = null;
+		if( meToOther == null ){
+			return;
+		}
 		
 		try {
 			while( !meToOther.isClosed() ){

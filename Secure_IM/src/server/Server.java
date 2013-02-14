@@ -75,19 +75,27 @@ public class Server extends Thread{
 			while( sp.getWorkflowType() != ServerWorkflow.statusChange || sp.getStatus() != Status.offline ){
 				switch( sp.getWorkflowType() ){
 					case getIP:
-						System.out.println("Getting IP for " + sp.getUsername());
-						System.out.println("IP: " + activeUsers.get( sp.getUsername() ).getIP() );
-						sp.setIP( activeUsers.get( sp.getUsername() ).getIP() );
+						if( activeUsers.containsKey( sp.getUsername() ) ){
+							System.out.println("Getting IP for " + sp.getUsername());
+							System.out.println("IP: " + activeUsers.get( sp.getUsername() ).getIP() );
+							sp.setIP( activeUsers.get( sp.getUsername() ).getIP() );							
+						}else{
+							sp.setIP( null );
+						}
 						oos.writeObject( sp );
 						break;
 					
 					case editBuddy:
-						if( sp.getOperation() == ServerPacket.add ){
-							System.out.println("Adding " + sp.getBuddyName() + " to " + sp.getUsername() + "'s buddy list");
-							activeUsers.get( sp.getBuddyName() ).addUserToNotifyList( sp.getUsername() );
+						if( activeUsers.get( sp.getBuddyName() ) != null ){
+							if( sp.getOperation() == ServerPacket.add ){
+								System.out.println("Adding " + sp.getBuddyName() + " to " + sp.getUsername() + "'s buddy list");
+								activeUsers.get( sp.getBuddyName() ).addUserToNotifyList( sp.getUsername() );
+							}else{
+								System.out.println("Removing " + sp.getBuddyName() + " to " + sp.getUsername() + "'s buddy list");
+								activeUsers.get( sp.getBuddyName() ).removeUserFromNotifyList( sp.getUsername() );
+							}
 						}else{
-							System.out.println("Removing " + sp.getBuddyName() + " to " + sp.getUsername() + "'s buddy list");
-							activeUsers.get( sp.getBuddyName() ).removeUserFromNotifyList( sp.getUsername() );
+							System.out.println( "Buddy " + sp.getBuddyName() + " does not exist." );
 						}
 						break;
 						
@@ -98,14 +106,6 @@ public class Server extends Thread{
 						System.out.println("Changing " + sp.getUsername() + " status to " + sp.getStatus());
 						
 						activeUsers.get( username ).changeStatus( sp.getStatus() );
-						for( String thisUser : activeUsers.get( username ).getNotifyList() ){
-							if( activeUsers.get( thisUser ).getStatus() != Status.offline ){
-							/*	Socket toNotify = new Socket( activeUsers.get( thisUser ).getIP(), Comm.SERVER_PORT );
-								ObjectOutputStream out = new ObjectOutputStream( toNotify.getOutputStream() );
-								out.writeObject( sp );
-								out.close();*/
-							}
-						}
 						break;
 				}
 				sp = (ServerPacket) ois.readObject();

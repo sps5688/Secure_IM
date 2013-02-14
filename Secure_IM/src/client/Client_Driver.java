@@ -18,7 +18,7 @@ public class Client_Driver {
 	public static HashMap<String, Comm> comms;
 	
 	public static void createUser(String userName ){
-		initComm();
+		initComms();
 		currentUser = new User(userName );
 		// Update Server with user name so there are no duplicates
 	}
@@ -27,7 +27,7 @@ public class Client_Driver {
 		isOpened = newOpened;
 	}
 	
-	public static void initComm(){
+	public static void initComms(){
 		comms = new HashMap<String, Comm>();
 		isOpened = true;
 	}
@@ -69,7 +69,7 @@ public class Client_Driver {
 		g = new GUI( exists );
 		
 		try{
-			Comm.initComm();
+			Comm.initComm( args[0] );
 		} catch (NoInternetException e) {
 			System.err.println( e.getMessage() );
 		}
