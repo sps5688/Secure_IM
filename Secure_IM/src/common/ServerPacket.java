@@ -3,42 +3,70 @@ package common;
 import java.io.Serializable;
 import java.net.InetAddress;
 
+/**
+ * ServerPacket.java
+ * 
+ * Represents a packet that is sent from a client to the server.
+ * 
+ * @author Steven Shaw
+ * @author Keith Feldman
+ */
 public class ServerPacket implements Serializable{
 
 	private static final long serialVersionUID = 6561981141432776662L;
 
+	// Static variables to indicate adding or removing
 	public final static boolean delete = false;
 	public final static boolean add = true;
 		
 	private ServerWorkflow sw;
 	
-	//used in 1,2,3
+	// Used in work flows 1,2,3
 	private String username;
 	
-	//used in 2
+	// Used in work flow 2
 	private Status newStatus;
 	
-	//used in 3
+	// Used in work flow 3
 	private String buddyName;
 	private boolean operation;
 	
-	//returned in 1
+	// Returned in work flow 1
 	private InetAddress IP;
 
-	//1st workflow -- get IP for a given uname
+	/**
+	 * Constructs a new ServerPacket to be used
+	 * in work flow #1 which retrieves a client's IP Address
+	 * 
+	 * @param username The client to be used for IP lookup
+	 */
 	public ServerPacket( String username ){
 		sw = ServerWorkflow.getIP;
 		this.username = username;
 	}
 	
-	//2nd workflow -- client changes status to newStatus
+	/**
+	 * Constructs a new ServerPacket to be used
+	 * in work flow #2 which changes a client's status.
+	 * 
+	 * @param username The client to whose status will be changed
+	 * @param newStatus The client's new status
+	 */
 	public ServerPacket( String username, Status newStatus ){
 		sw = ServerWorkflow.statusChange;
 		this.username = username;
 		this.newStatus = newStatus;
 	}
 	
-	//3rd workflow -- client adds or removes a buddy
+	/**
+	 * Constructs a new ServerPacket to be used
+	 * in work flow #3 which adds or removes a buddy
+	 * to/from a client's buddy list.
+	 * 
+	 * @param sendingClient The user name of the sending client
+	 * @param buddyName The name of the buddy to add to the client's buddy list
+	 * @param operation Indicates which operation the server should perform (Add/Remove)
+	 */
 	public ServerPacket( String sendingClient, String buddyName, boolean operation ){
 		sw = ServerWorkflow.editBuddy;
 		this.username = sendingClient;
@@ -46,40 +74,80 @@ public class ServerPacket implements Serializable{
 		this.operation = operation;
 	}
 	
-	//used in 1,2,3
+	/**
+	 * Retrieves the name of the packet sender.
+	 * Used in work flow 1,2, and 3.
+	 * 
+	 * @return the client who sent the packet
+	 */
 	public String getUsername(){
 		return username;
 	}
 	
-	//used in 2
+	/**
+	 * Retrieves the client's status contained in the packet.
+	 * Used in work flow #2
+	
+	 * @return the client's status
+	 */
 	public Status getStatus(){
 		return newStatus;
 	}
 	
-	//used in 3
+	/**
+	 * Retrieves the name of the buddy a client is altering.
+	 * Used in work flow #3
+	
+	 * @return the name of the buddy
+	 */
 	public String getBuddyName(){
 		return buddyName;
 	}
 	
-	//used in 3
+	/**
+	 * Retrieves the operation that will be performed (Add/Remove).
+	 * Used in work flow #3
+	
+	 * @return the operation value
+	 */
 	public boolean getOperation(){
 		return operation;
 	}
 	
-	//returned in 1
+	/**
+	 * Sets the IP that the packet will contain.
+	 * Returned in work flow #1
+	
+	 * @param IP the IP Address to set
+	 */
 	public void setIP( InetAddress IP ){
 		this.IP = IP;
 	}
 	
-	//returned in 1
+	/**
+	 * Gets the IP that the packet contains.
+	 * Returned in work flow #1
+	
+	 * @return the IP Address
+	 */
 	public InetAddress getIP(){
 		return IP;
 	}
 	
+	/**
+	 * Sets the status of a client.
+	 * 
+	 * @param newStatus the new status
+	 */
 	public void setStatus( Status newStatus ){
 		this.newStatus = newStatus;
 	}
 	
+	/**
+	 * Retrieves the work flow type for the packet.
+	 * 
+	 * @return the work flow type
+	 */
 	public ServerWorkflow getWorkflowType(){
 		return sw;
 	}

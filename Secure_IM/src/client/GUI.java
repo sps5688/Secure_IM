@@ -17,7 +17,16 @@ import java.util.ArrayList;
 
 import javax.swing.*;
 
+/**
+ * GUI.java
+ * 
+ * Graphical User Interface for the client program.
+ * 
+ * @author Steven Shaw
+ * @author Keith Feldman
+ */
 public class GUI implements KeyListener, WindowListener, ActionListener, MouseListener{
+	// GUI components
 	private JFrame mainFrame;
 	private JTextArea messageInputArea;
 	private JTextArea messageHistoryArea;
@@ -28,6 +37,11 @@ public class GUI implements KeyListener, WindowListener, ActionListener, MouseLi
 	
 	private String selectedBuddy;
 	
+	/**
+	 * Constructs a new GUI for a client.
+	 * 
+	 * @param exists If the user already exsists on the system or not
+	 */
 	public GUI( boolean exists ){
 		// If first time running program, prompt for user name
 		String userName;
@@ -84,6 +98,7 @@ public class GUI implements KeyListener, WindowListener, ActionListener, MouseLi
 		messageHistoryArea.setBackground(Color.lightGray);
 		messageHistoryArea.setEditable(false);
 		
+		// Handles scroll bar
 		JScrollPane scroll = new JScrollPane(messageHistoryArea);
 		middlePanel.add(scroll);
 		
@@ -91,12 +106,14 @@ public class GUI implements KeyListener, WindowListener, ActionListener, MouseLi
 		leftPanel = new JPanel();
 		leftPanel.setSize(50, 600);
 		
+		// Inits buddy list
 		buddyListArea = new JList(model);
 		ArrayList<String> buddies =  Client_Driver.getCurrentUser().getBuddies();
 		for(String curBuddy : buddies){
 			model.addElement(curBuddy);
 		}
 		
+		// Buddy list configuration
 		buddyListArea.setLayoutOrientation(JList.VERTICAL);
 		buddyListArea.setBackground(Color.white);
 		buddyListArea.addMouseListener(this);
@@ -111,7 +128,12 @@ public class GUI implements KeyListener, WindowListener, ActionListener, MouseLi
 		mainFrame.setVisible(true);
 	}
 	
-	// KeyListener Methods
+	/**
+	 * Handles keyboard keyTyped event that occurs when user
+	 * types in the messageInputArea box.
+	 * 
+	 * @param arg0 The key that was entered
+	 */
 	@Override
 	public void keyTyped(KeyEvent arg0) {
 		if(arg0.getKeyChar() == '\n'){
@@ -123,23 +145,23 @@ public class GUI implements KeyListener, WindowListener, ActionListener, MouseLi
 				message = message.trim();
 				
 				if(!message.equals("") || message == null){
-					// Send Message
+					// Send Message and update message history area
 					Client_Driver.getCurrentUser().addSentMessage(receiver, message);
 					messageHistoryArea.setText(Client_Driver.getCurrentUser().getMessageHistory(receiver));
 				}
 			}
 			
+			// Resets message input box
 			messageInputArea.setText("");
 		}
 	}
-	
-	@Override
-	public void keyPressed(KeyEvent arg0) { }
 
-	@Override
-	public void keyReleased(KeyEvent arg0) { }
-	
-	// WindowListener Methods
+	/**
+	 * Handles window windowClosing event that occurs when
+	 * the user closes the program by exiting the window.
+	 * 
+	 * @param arg0 The WindowEvent that occurred
+	 */
 	@Override
 	public void windowClosing(WindowEvent arg0) {
 		// Serialize data object to a file
@@ -151,14 +173,110 @@ public class GUI implements KeyListener, WindowListener, ActionListener, MouseLi
 				Comm c = Client_Driver.comms.get( thisUser );
 				c.stopClientStreams();
 			}
+			
+			// Stop network connections
 			Comm.stopServerSocket();
 			Client_Driver.updateOpened( false );
 			
+			// Exit program
 			System.exit(0);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
+	
+	/**
+	 * Handles Action actionPerformed event that occurs
+	 * when the Add or Remove Buttons are clicked.
+	 * 
+	 * @param arg0 The ActionEvent that occurred
+	 */
+	@Override
+	public void actionPerformed(ActionEvent arg0) {
+		// Adding Buddy
+		if(arg0.getActionCommand().equals("Add Buddy")){
+			String buddyName = JOptionPane.showInputDialog(null, "Buddy Name:", null);
+			try {
+				Client_Driver.getCurrentUser().addBuddy(buddyName);
+			} catch (NoInternetException e) {
+				System.err.println( e.getMessage() );
+			}
+			
+			// Add and refresh GUI
+			model.addElement(buddyName);
+			mainFrame.validate();
+		}else if(arg0.getActionCommand().equals("Remove Buddy")){
+			// Removing Buddy
+			String buddyName = (String) buddyListArea.getSelectedValue();
+			
+			if(buddyName != null){
+				try{
+					Client_Driver.getCurrentUser().removeBuddy(buddyName);
+				} catch (NoInternetException e) {
+					System.err.println( e.getMessage() );
+				}
+
+				Client_Driver.getCurrentUser().deleteMessageHistory(buddyName);
+				
+				// Remove and refresh GUI
+				model.remove(model.indexOf(buddyName));
+				mainFrame.validate();	
+				messageHistoryArea.setText("");
+			}
+		}
+	}
+	
+	/**
+	 * Handles Mouse mouseReleased event that occurs
+	 * when the user's buddy list is clicked.
+	 * 
+	 * @param arg0 The ActionEvent that occurred
+	 */
+	@Override
+	public void mouseReleased(MouseEvent arg0) {
+		selectedBuddy = (String) buddyListArea.getSelectedValue();
+		
+		// Updates message history area
+		if(selectedBuddy != null){
+			messageHistoryArea.setText(Client_Driver.getCurrentUser().getMessageHistory(selectedBuddy));
+			Client_Driver.getCurrentUser().setCurrentBuddy(selectedBuddy);
+		}
+	}
+	
+	/**
+	 * Retrieves the message history for a buddy and
+	 * updates the messageHistoryArea in the GUI.
+	 * 
+	 * @param buddyName The name of the buddy to get the message history for.
+	 */
+	public void refreshMessageHistoryArea( String buddyName ){
+		messageHistoryArea.setText( Client_Driver.getCurrentUser().getMessageHistory( buddyName ) );
+	}
+	
+	/**
+	 * Changes the status of a buddy.
+	 * 
+	 * @param buddy The name of the buddy whose status is changed.
+	 * @param enable If the buddy is available or not.
+	 */
+	public void changeBuddyStatus( String buddy, boolean enable ){
+		int i = model.indexOf( buddy );
+		buddyListArea.getComponent( i ).setEnabled( enable );
+		mainFrame.validate();
+	}
+	
+	/* Unused methods */
+	@Override
+	public void mouseClicked(MouseEvent arg0) { }
+
+	@Override
+	public void mouseEntered(MouseEvent arg0) { }
+
+	@Override
+	public void mouseExited(MouseEvent arg0) { }
+	
+	@Override
+	public void mousePressed(MouseEvent arg0) { }
 	
 	@Override
 	public void windowActivated(WindowEvent arg0) { }
@@ -177,68 +295,10 @@ public class GUI implements KeyListener, WindowListener, ActionListener, MouseLi
 
 	@Override
 	public void windowOpened(WindowEvent arg0) { }
-
-	// ActionListener Methods
-	@Override
-	public void actionPerformed(ActionEvent arg0) {
-		if(arg0.getActionCommand().equals("Add Buddy")){
-			String buddyName = JOptionPane.showInputDialog(null, "Buddy Name:", null);
-			try {
-				Client_Driver.getCurrentUser().addBuddy(buddyName);
-			} catch (NoInternetException e) {
-				System.err.println( e.getMessage() );
-			}
-			
-			model.addElement(buddyName);
-			mainFrame.validate();
-		}else if(arg0.getActionCommand().equals("Remove Buddy")){
-			String buddyName = (String) buddyListArea.getSelectedValue();
-			
-			if(buddyName != null){
-				try{
-					Client_Driver.getCurrentUser().removeBuddy(buddyName);
-				} catch (NoInternetException e) {
-					System.err.println( e.getMessage() );
-				}
-
-				Client_Driver.getCurrentUser().deleteMessageHistory(buddyName);
-				
-				model.remove(model.indexOf(buddyName));
-				mainFrame.validate();	
-				messageHistoryArea.setText("");
-			}
-		}
-	}
 	
 	@Override
-	public void mouseReleased(MouseEvent arg0) {
-		selectedBuddy = (String) buddyListArea.getSelectedValue();
-		
-		if(selectedBuddy != null){
-			messageHistoryArea.setText(Client_Driver.getCurrentUser().getMessageHistory(selectedBuddy));
-			Client_Driver.getCurrentUser().setCurrentBuddy(selectedBuddy);
-		}
-	}
-	
-	@Override
-	public void mouseClicked(MouseEvent arg0) { }
+	public void keyPressed(KeyEvent arg0) { }
 
 	@Override
-	public void mouseEntered(MouseEvent arg0) { }
-
-	@Override
-	public void mouseExited(MouseEvent arg0) { }
-
-	@Override
-	public void mousePressed(MouseEvent arg0) { }
-	
-	public void refreshMessageHistoryArea( String buddyName ){
-		messageHistoryArea.setText( Client_Driver.getCurrentUser().getMessageHistory( buddyName ) );
-	}
-	
-	public void changeBuddyStatus( String buddy, boolean enable ){
-		int i = model.indexOf( buddy );
-		buddyListArea.getComponent( i ).setEnabled( enable );
-		mainFrame.validate();
-	}
+	public void keyReleased(KeyEvent arg0) { }
 }

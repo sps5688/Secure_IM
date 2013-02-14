@@ -12,15 +12,33 @@ import common.ServerPacket;
 import common.ServerWorkflow;
 import common.Status;
 
+/**
+ * Server.java
+ * 
+ * @author Steven Shaw
+ * @author Keith Feldman
+ */
 public class Server extends Thread{
 	public static ServerSocket socket;
 	
+	// Active User storage structure
 	public static HashMap<String, ClientInfo> activeUsers = new HashMap<String, ClientInfo>();
 	
+	/**
+	 * Removes a user from the active users list.
+	 * 
+	 * @param username The username to remove from the active
+	 *  user storage structure.
+	 */
 	public static void removeActiveUser(String username){
 		activeUsers.remove(username);
 	}
 	
+	/**
+	 * Main method for server execution.
+	 * 
+	 * @param args command line arguments
+	 */
 	public static void main(String[] args){
 	    try{
 	    	socket = new ServerSocket( 8010 );
@@ -41,15 +59,22 @@ public class Server extends Thread{
 	    }
 	}
 	
+	// Client communication
 	private ServerPacket sp;
 	private Socket clientConn;
 	private String username;
 	private ObjectInputStream ois;
 	private ObjectOutputStream oos;
 	
+	/**
+	 * Represents a connection from a client.
+	 * 
+	 * @param connection The client's socket connection
+	 */
 	public Server( Socket connection ){
 		this.clientConn = connection;
 		
+		// Communicates with a client
 		try {
 			ois = new ObjectInputStream(clientConn.getInputStream() );
 			oos = new ObjectOutputStream( clientConn.getOutputStream() );
@@ -70,11 +95,16 @@ public class Server extends Thread{
 		
 	}
 	
+	/**
+	 * Creates a new thread for each connected user.
+	 */
 	public void run(){
-		try {	
+		try {
+			// Processes user's requests until they sign off
 			while( sp.getWorkflowType() != ServerWorkflow.statusChange || sp.getStatus() != Status.offline ){
 				switch( sp.getWorkflowType() ){
 					case getIP:
+						// Retrieves a buddies IP address
 						if( activeUsers.containsKey( sp.getUsername() ) ){
 							System.out.println("Getting IP for " + sp.getUsername());
 							System.out.println("IP: " + activeUsers.get( sp.getUsername() ).getIP() );
@@ -86,6 +116,7 @@ public class Server extends Thread{
 						break;
 					
 					case editBuddy:
+						// Adds or removes a buddy from the user's buddy list
 						if( activeUsers.get( sp.getBuddyName() ) != null ){
 							if( sp.getOperation() == ServerPacket.add ){
 								System.out.println("Adding " + sp.getBuddyName() + " to " + sp.getUsername() + "'s buddy list");
@@ -100,6 +131,7 @@ public class Server extends Thread{
 						break;
 						
 					case statusChange:
+						// Changes a user's status
 						ClientInfo info = activeUsers.get( username );
 						info.setIP( clientConn.getInetAddress() );
 						activeUsers.put( username, info );
