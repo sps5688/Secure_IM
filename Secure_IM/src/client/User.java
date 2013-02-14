@@ -7,6 +7,10 @@ import java.util.HashMap;
 
 import common.ServerPacket;
 
+/**
+ * Class for user
+ * @author Steve
+ */
 @SuppressWarnings("serial")
 public class User implements Serializable{
 
@@ -15,19 +19,36 @@ public class User implements Serializable{
 	private String userName;
 	private String currentBuddy;
 	
+	/**
+	 * Creates a new user with the given name
+	 * @param userName the name for this user
+	 */
 	public User(String userName){
 		this.userName = userName;
 		buddies.add("MySpace Tom");
 	}
 	
+	/**
+	 * Gets all the buddies for this user
+	 * @return an arraylist containing all the buddies for this user
+	 */
 	public ArrayList<String> getBuddies(){ 
 		return buddies;
 	}
 	
+	/**
+	 * returns the username
+	 * @return the username
+	 */
 	public String getUsername(){
 		return userName;
 	}
 		
+	/**
+	 * Adds a new buddy with the given name
+	 * @param buddyName the name to add for this user
+	 * @throws NoInternetException if there are problems informing the server this buddy was added
+	 */
 	public void addBuddy(String buddyName) throws NoInternetException{
 		buddies.add(buddyName);
 		try {
@@ -37,7 +58,12 @@ public class User implements Serializable{
 			throw new NoInternetException( "Can't connect to the server." );
 		}
 	}
-	
+
+	/**
+	 * Removes a buddy with the given name
+	 * @param buddyName the name to remove for this user
+	 * @throws NoInternetException if there are problems informing the server this buddy was removed
+	 */
 	public void removeBuddy(String buddyName) throws NoInternetException{
 		buddies.remove(buddyName);
 		try {
@@ -48,6 +74,11 @@ public class User implements Serializable{
 		}
 	}
 	
+	/**
+	 * Add a sent message to the messageLog
+	 * @param buddyName the buddy name for this message
+	 * @param message the message that will be sent
+	 */
 	public void addSentMessage(String buddyName, String message){
 		if(messageLog.get(buddyName) == null){
 			messageLog.put(buddyName, userName + ": " + message + "\n");
@@ -70,6 +101,11 @@ public class User implements Serializable{
 		}
 	}
 	
+	/**
+	 * Receive a message and add this to the messageLog
+	 * @param buddyName the buddy name for this message
+	 * @param message the message that was received
+	 */
 	public void addReceivedMessage(String buddyName, String message){
 		if(messageLog.get(buddyName) == null){
 			messageLog.put(buddyName, buddyName + ": " + message + "\n");
@@ -80,18 +116,35 @@ public class User implements Serializable{
 		}
 	}
 	
+	/**
+	 * set the currently selected buddy
+	 * @param buddy the new currently selected buddy
+	 */
 	public void setCurrentBuddy( String buddy ){
 		currentBuddy = buddy;
 	}
 	
+	/**
+	 * get the currently selected buddy
+	 * @return the currently selected buddy
+	 */
 	public String getCurrentBuddy(){
 		return currentBuddy;
 	}
 	
+	/**
+	 * get the message history for a given buddy name
+	 * @param buddyName the buddy for which to get the history
+	 * @return the history for the buddy
+	 */
 	public String getMessageHistory(String buddyName){
 		return messageLog.get(buddyName);
 	}
 	
+	/**
+	 * delete message history for a given buddy
+	 * @param buddyName the buddy name for which to remove the history
+	 */
 	public void deleteMessageHistory(String buddyName){
 		messageLog.remove(buddyName);
 	}

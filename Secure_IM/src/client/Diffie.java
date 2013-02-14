@@ -1,9 +1,13 @@
 package client;
 
+/**
+ * Implementation of the Diffie-Hellman protocol
+ * @author Keith
+ */
 public class Diffie{
 
-	private static final int MAX_PRIME = 37;
-	private static final int MIN_PRIME = 11;
+	private static final int MAX_PRIME = 40;
+	private static final int MIN_PRIME = 10;
 	
 	private static final int MAX_A = 10;
 	
@@ -13,6 +17,10 @@ public class Diffie{
 	
 	private long key;
 
+	/**
+	 * Starts diffie-hellman, used when sending messages
+	 * Sets p, g, and a
+	 */
 	public Diffie(){
 		int prime_range = MAX_PRIME - MIN_PRIME;
 		int a_range = MAX_A - 2;
@@ -29,8 +37,12 @@ public class Diffie{
 		System.out.println( "Generating p, g, and a: p " + p + " g " + g + " a " + a);
 	}
 	
+	/**
+	 * Used when receiving message
+	 * Sets the p, g, and v values
+	 * @param pgv the received p, g, and v values
+	 */
 	public Diffie( String pgv ){
-
 		String[] pgvSplit = pgv.split( " " );
 		p = Integer.parseInt( pgvSplit[1] );
 		g = Integer.parseInt( pgvSplit[3] );
@@ -43,21 +55,37 @@ public class Diffie{
 		
 	}
 
+	/**
+	 * gets the V value and then sets the key
+	 * @param v is equal to g^b mod p
+	 */
 	public void getV( long v ){
 		System.out.println( "Received v: " + v );
 		key = HighMod( v, a, p );
 	}
 
+	/**
+	 * sends the U value
+	 * @return the U value, U is equal to g^a mod p
+	 */
 	public long sendU(){
 		System.out.println( "Sending u: " + HighMod( g, a, p ) );
 		return HighMod( g, a, p );
 	}
 	
+	/**
+	 * Return the key
+	 * @return the key
+	 */
 	public long getKey(){
 		System.out.println( "Getting key: " + key );
 		return key;
 	}
 	
+	/**
+	 * Sends the P, G, and U values that were generated
+	 * @return a string containing p, g, and u
+	 */
 	public String sendPGU(){
 		String pS = "p " + String.valueOf( p );
 		String gS = " g " + String.valueOf( g );
