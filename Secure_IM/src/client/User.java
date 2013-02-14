@@ -9,7 +9,8 @@ import common.ServerPacket;
 
 /**
  * Class for user
- * @author Steve
+ * @author Steven Shaw
+ * @author Keith Feldman
  */
 @SuppressWarnings("serial")
 public class User implements Serializable{

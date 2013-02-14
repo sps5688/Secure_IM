@@ -12,7 +12,8 @@ import common.Status;
 import java.util.HashMap;
 
 /**
- * @author Steve
+ * @author Steven Shaw
+ * @author Keith Feldman
  * Client Driver is where the client is started from
  * Called with the server hostname as an argument
  */
@@ -104,7 +105,12 @@ public class Client_Driver {
 		g = new GUI( exists );
 		
 		try{
-			Comm.initComm( args[0] );
+			if( args.length != 1 ){
+				System.err.println( "usage: java client/Client_Driver hostname" );
+				System.exit( 1 );
+			}else{
+				Comm.initComm( args[0] );				
+			}
 		} catch (NoInternetException e) {
 			System.err.println( e.getMessage() );
 		}

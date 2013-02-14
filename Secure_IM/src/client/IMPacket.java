@@ -4,7 +4,8 @@ import java.io.Serializable;
 
 /**
  * Class for sending IM data
- * @author Keith
+ * @author Steven Shaw
+ * @author Keith Feldman
  */
 public class IMPacket implements Serializable{
 

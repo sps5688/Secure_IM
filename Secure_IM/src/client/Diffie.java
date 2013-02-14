@@ -2,7 +2,8 @@ package client;
 
 /**
  * Implementation of the Diffie-Hellman protocol
- * @author Keith
+ * @author Steven Shaw
+ * @author Keith Feldman
  */
 public class Diffie{
 

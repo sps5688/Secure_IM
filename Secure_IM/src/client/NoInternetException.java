@@ -2,7 +2,8 @@ package client;
 
 /**
  * Custom exception class for socket issues
- * @author keithf
+ * @author Steven Shaw
+ * @author Keith Feldman
  */
 public class NoInternetException extends java.net.UnknownHostException{
 

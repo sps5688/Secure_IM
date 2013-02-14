@@ -23,7 +23,8 @@ import common.ServerPacket;
 
 /**
  * Class for communicating with the server, and for each client
- * @author Keith
+ * @author Steven Shaw
+ * @author Keith Feldman
  */
 public class Comm extends Thread{
 
