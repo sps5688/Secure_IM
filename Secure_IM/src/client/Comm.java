@@ -21,12 +21,23 @@ import javax.crypto.spec.SecretKeySpec;
 import common.Status;
 import common.ServerPacket;
 
+/**
+ * Class for communicating with the server, and for each client
+ * @author Keith
+ */
 public class Comm extends Thread{
 
+	/**
+	 * The server port
+	 */
 	public static final int SERVER_PORT = 8010;
+	
+	/**
+	 * The port for other clients
+	 */
 	public static final int COMM_PORT = 8011;
 	
-	public static InetAddress SERVER;
+	private static InetAddress SERVER;
 	
 	private static Socket clientToServer;
 
@@ -35,6 +46,11 @@ public class Comm extends Thread{
 	private static ObjectOutputStream ServerOOS;
 	private static ObjectInputStream ServerOIS;
 	
+	/**
+	 * Starts the connection to the server
+	 * @param host the hostname for the Server
+	 * @throws NoInternetException if comm cannot connect to hostname
+	 */
 	public static void initComm( String host ) throws NoInternetException{
 		try {
 			SERVER = InetAddress.getByName( host );
@@ -47,6 +63,10 @@ public class Comm extends Thread{
 		}
 	}
 	
+	/**
+	 * Starts the socket for the server
+	 * @throws NoInternetException if the server cannot be found
+	 */
 	private static void startServerSocket() throws NoInternetException{
 		try{
 			clientToServer = new Socket( SERVER, SERVER_PORT );
@@ -64,6 +84,10 @@ public class Comm extends Thread{
 		}
 	}
 	
+	/**
+	 * Terminates the socket and respective streams for the socket
+	 * @throws NoInternetException if the socket can't be closed
+	 */
 	public static void stopServerSocket() throws NoInternetException{
 		try {
 			ServerPacket signingOff = new ServerPacket( Client_Driver.getCurrentUser().getUsername(), Status.offline );
@@ -92,6 +116,11 @@ public class Comm extends Thread{
 		
 	}
 	
+	/**
+	 * Sends a server packet to the server
+	 * @param sp the packet to send
+	 * @throws NoInternetException if the packet can't be sent
+	 */
 	public static void sendServerPacket( ServerPacket sp ) throws NoInternetException{
 		try {
 			if( ServerOOS == null ){
@@ -104,6 +133,12 @@ public class Comm extends Thread{
 		}
 	}
 	
+	/**
+	 * Receive a server packet, will block on readObject
+	 * @return the received server packet
+	 * @throws NoInternetException if there is a problem with the input stream or
+	 * 	the received packet is not a server packet
+	 */
 	private static ServerPacket receiveServerPacket() throws NoInternetException{
 		ServerPacket sp = null;
 		try{
@@ -198,11 +233,20 @@ public class Comm extends Thread{
 	
 	private boolean started;
 	
+	/**
+	 * Creates a new comm, called when sending message to new buddy
+	 * @throws NoInternetException if there is a problem with the sockets
+	 */
 	public Comm() throws NoInternetException{
 		d = new Diffie();
 		key = -1;
 	}
 	
+	/**
+	 * Creates a new comm, used when receiving a message from new buddy
+	 * @param received
+	 * @throws NoInternetException
+	 */
 	public Comm( Socket received ) throws NoInternetException{
 		started = false;
 		key = -1;
@@ -211,6 +255,9 @@ public class Comm extends Thread{
 		
 	}
 	
+	/**
+	 * Creates a new diffie, used when receiving a message from new buddy
+	 */
 	public void initDiffie(){
 		IMPacket pgv;
 		try {
@@ -234,6 +281,9 @@ public class Comm extends Thread{
 		}
 	}
 	
+	/**
+	 * Called when exiting the program, stops all the open streams
+	 */
 	public void stopClientStreams(){
 		try {
 			if( ClientOOS != null ){
@@ -256,6 +306,11 @@ public class Comm extends Thread{
 		}
 	}
 
+	/**
+	 * Sends an encrypted message
+	 * @param toSend the unencrypted packet
+	 * @throws NoInternetException if there is a problem with the socket to the buddy
+	 */
 	public void sendMessage( IMPacket toSend ) throws NoInternetException{
 		try {
 			if( meToOther == null ){
@@ -286,10 +341,17 @@ public class Comm extends Thread{
 		}
 	}
 	
+	/**
+	 * Returns whether this comm object has been started
+	 * @return whether comm object has been started
+	 */
 	public boolean hasStarted(){
 		return started;
 	}
 	
+	/**
+	 * Received IMPackets and then updates the GUI
+	 */
 	public void run(){
 		started = true;
 		IMPacket received = null;
@@ -318,6 +380,11 @@ public class Comm extends Thread{
 
 	}
 		
+	/**
+	 * Sends an IMPacket to the buddy
+	 * @param i the IMPacket to send
+	 * @throws NoInternetException if there is a problem with the sockets
+	 */
 	private void sendIMPacket( IMPacket i ) throws NoInternetException{
 		try {
 			if( ClientOOS == null ){
@@ -329,6 +396,11 @@ public class Comm extends Thread{
 		}
 	}
 	
+	/**
+	 * Receives an IMPacket
+	 * @return the received IMPacket
+	 * @throws NoInternetException if there is a problem with the sockets
+	 */
 	public IMPacket receiveIMPacket() throws NoInternetException{
 		IMPacket im = null;
 		try{
